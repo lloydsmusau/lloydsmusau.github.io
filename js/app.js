@@ -25,95 +25,42 @@ async function initializeSite() {
 
     try {
 
-        console.log(
-            "Initializing Lloyds Musau portfolio..."
-        );
+        console.log("Initializing Lloyds Musau portfolio...");
 
-
-        /*
-         * Load CMS first.
-         * The website should be driven by the
-         * Google Sheets content layer.
-         */
-
+        /* Load CMS */
         const data = await CMS.load();
 
         SITE_STATE.cms = data;
 
+        console.log("Portfolio CMS:", data);
 
-        console.log(
-            "Portfolio CMS:",
-            data
-        );
-
-
-        /*
-         * Basic site configuration.
-         */
-
+        /* Site configuration */
         applySiteMetadata(data);
-
         applySettings(data.settings);
 
-
-        /*
-         * Static UI systems.
-         */
-
+        /* Static UI */
         setupNavigation();
-
         setupCalendar(data.profile);
-
         setupContactLinks(data.profile);
 
-
-        /*
-         * Render CMS-driven content.
-         */
-
+        /* CMS content */
         renderProfile(data.profile);
-
         renderExpertise(data.skills);
-
         renderExperience(data.experience);
-
         renderProjects(data.projects);
-
         renderSkills(data.skills);
+        renderCertifications(data.certifications);
+        renderEducation(data.education);
 
-        renderCertifications(
-            data.certifications
-        );
-
-        renderEducation(
-            data.education
-        );
-
-
-        /*
-         * Interactive systems.
-         */
-
+        /* Interactive systems */
         setupRevealAnimations();
-
         setupSmoothScrolling();
-
         setupCurrentYear();
-
         setupBackToTop();
-
-
-        /*
-         * Site successfully initialized.
-         */
 
         SITE_STATE.initialized = true;
 
-
-        console.log(
-            "Portfolio initialized successfully."
-        );
-
+        console.log("Portfolio initialized successfully.");
 
         hideLoader();
 
@@ -124,28 +71,16 @@ async function initializeSite() {
             error
         );
 
-
-        /*
-         * Keep the static HTML usable if
-         * the CMS becomes temporarily unavailable.
-         */
-
         showCMSFallback();
 
         setupNavigation();
-
         setupSmoothScrolling();
-
         setupRevealAnimations();
-
         setupCurrentYear();
-
         setupBackToTop();
 
         hideLoader();
-
     }
-
 }
 
 
@@ -159,37 +94,16 @@ function applySiteMetadata(data) {
         return;
     }
 
-
-    const profile =
-        data.profile || {};
-
-    const settings =
-        data.settings || {};
-
+    const profile = data.profile || {};
+    const settings = data.settings || {};
 
     const siteName =
-        CMS.value(
-            settings,
-            "site_name"
-        ) ||
-        CMS.value(
-            profile,
-            "name"
-        ) ||
+        CMS.value(settings, "site_name") ||
+        CMS.value(profile, "name") ||
         "Lloyds Musau";
-
-
-    /*
-     * Browser title.
-     */
 
     document.title =
         `${siteName} — IT Administrator & IT Operations Professional`;
-
-
-    /*
-     * Meta description.
-     */
 
     const description =
         CMS.value(
@@ -200,7 +114,6 @@ function applySiteMetadata(data) {
             "tagline"
         );
 
-
     if (description) {
 
         let meta =
@@ -208,25 +121,17 @@ function applySiteMetadata(data) {
                 'meta[name="description"]'
             );
 
-
         if (!meta) {
 
-            meta =
-                document.createElement("meta");
+            meta = document.createElement("meta");
 
-            meta.name =
-                "description";
+            meta.name = "description";
 
             document.head.appendChild(meta);
-
         }
 
-
-        meta.content =
-            description;
-
+        meta.content = description;
     }
-
 }
 
 
@@ -240,42 +145,28 @@ function applySettings(settings) {
         return;
     }
 
-
     const visibilityMap = {
 
-        show_experience:
-            "experience-section",
+        show_experience: "experience-section",
 
-        show_projects:
-            "projects-section",
+        show_projects: "projects-section",
 
-        show_certifications:
-            "certifications-section",
+        show_certifications: "certifications-section",
 
-        show_skills:
-            "skills-section",
+        show_skills: "skills-section",
 
-        show_education:
-            "education-section"
-
+        show_education: "education-section"
     };
 
-
-    Object.entries(
-        visibilityMap
-    ).forEach(
+    Object.entries(visibilityMap).forEach(
         ([setting, sectionId]) => {
 
             const section =
-                document.getElementById(
-                    sectionId
-                );
-
+                document.getElementById(sectionId);
 
             if (!section) {
                 return;
             }
-
 
             const visible =
                 CMS.boolean(
@@ -283,13 +174,9 @@ function applySettings(settings) {
                     true
                 );
 
-
-            section.hidden =
-                !visible;
-
+            section.hidden = !visible;
         }
     );
-
 }
 
 
@@ -303,90 +190,47 @@ function renderProfile(profile) {
         !profile ||
         typeof profile !== "object"
     ) {
-
         return;
-
     }
 
-
-    /*
-     * Name.
-     */
-
+    /* Name */
     setText(
         "profile-name",
-        CMS.value(
-            profile,
-            "name"
-        )
+        CMS.value(profile, "name")
     );
-
 
     setText(
         "hero-name",
-        CMS.value(
-            profile,
-            "name"
-        )
+        CMS.value(profile, "name")
     );
 
-
-    /*
-     * Professional title.
-     */
-
+    /* Professional title */
     const title =
-        CMS.value(
-            profile,
-            "title"
-        );
-
+        CMS.value(profile, "title");
 
     setText(
         "profile-title",
         title
     );
 
-
     setText(
         "hero-title",
-        CMS.value(
-            profile,
-            "hero_title"
-        ) || title
+        CMS.value(profile, "hero_title") || title
     );
 
-
-    /*
-     * Tagline.
-     */
-
+    /* Tagline */
     setText(
         "hero-tagline",
-        CMS.value(
-            profile,
-            "tagline"
-        )
+        CMS.value(profile, "tagline")
     );
 
-
-    /*
-     * Location.
-     */
-
+    /* Location */
     setText(
         "profile-location",
-        CMS.value(
-            profile,
-            "location"
-        )
+        CMS.value(profile, "location")
     );
 
-
-    /*
-     * Hero description.
-     */
-
+    /* Hero description */
     const heroText =
         CMS.value(
             profile,
@@ -395,12 +239,10 @@ function renderProfile(profile) {
             "tagline"
         );
 
-
     const heroDescription =
         document.getElementById(
             "hero-description"
         );
-
 
     if (
         heroDescription &&
@@ -409,26 +251,19 @@ function renderProfile(profile) {
 
         heroDescription.innerHTML =
             CMS.text(heroText);
-
     }
 
-
-    /*
-     * About.
-     */
-
+    /* About */
     const about =
         CMS.value(
             profile,
             "about"
         );
 
-
     const aboutText =
         document.getElementById(
             "about-text"
         );
-
 
     if (
         aboutText &&
@@ -437,14 +272,9 @@ function renderProfile(profile) {
 
         aboutText.innerHTML =
             CMS.text(about);
-
     }
 
-
-    /*
-     * Profile image.
-     */
-
+    /* Profile image */
     const image =
         CMS.value(
             profile,
@@ -453,31 +283,24 @@ function renderProfile(profile) {
             "photo"
         );
 
-
     if (image) {
 
         document
             .querySelectorAll(
                 "[data-profile-image]"
             )
-            .forEach(
-                element => {
+            .forEach(element => {
 
-                    element.src =
-                        image;
+                element.src = image;
 
-                    element.alt =
-                        CMS.value(
-                            profile,
-                            "name"
-                        ) ||
-                        "Lloyds Musau";
-
-                }
-            );
-
+                element.alt =
+                    CMS.value(
+                        profile,
+                        "name"
+                    ) ||
+                    "Lloyds Musau";
+            });
     }
-
 }
 
 
@@ -493,44 +316,26 @@ function renderExpertise(items) {
             "expertise-grid"
         );
 
-
     if (!container) {
         return;
     }
 
-
     if (!Array.isArray(items)) {
 
-        container.innerHTML =
-            "";
+        container.innerHTML = "";
 
         return;
-
     }
-
-
-    /*
-     * Only featured skills contribute
-     * to the specialist-area display.
-     */
 
     const featured =
         items.filter(
-            item =>
-                CMS.isFeatured(item)
+            item => CMS.isFeatured(item)
         );
-
-
-    /*
-     * If nothing is featured, use
-     * all available skills.
-     */
 
     const source =
         featured.length
             ? featured
             : items;
-
 
     const grouped =
         CMS.groupBy(
@@ -538,10 +343,8 @@ function renderExpertise(items) {
             "category"
         );
 
-
     const categories =
         Object.entries(grouped);
-
 
     if (!categories.length) {
 
@@ -554,9 +357,7 @@ function renderExpertise(items) {
         `;
 
         return;
-
     }
-
 
     container.innerHTML =
         categories.map(
@@ -566,15 +367,10 @@ function renderExpertise(items) {
                     String(index + 1)
                         .padStart(2, "0");
 
-
                 return `
-                    <article
-                        class="expertise-card reveal"
-                    >
+                    <article class="expertise-card reveal">
 
-                        <span
-                            class="card-number"
-                        >
+                        <span class="card-number">
                             ${number}
                         </span>
 
@@ -582,9 +378,7 @@ function renderExpertise(items) {
                             ${CMS.escape(category)}
                         </h3>
 
-                        <div
-                            class="expertise-skills"
-                        >
+                        <div class="expertise-skills">
 
                             ${skills
                                 .map(skill => `
@@ -597,17 +391,14 @@ function renderExpertise(items) {
                                         )}
                                     </span>
                                 `)
-                                .join("")
-                            }
+                                .join("")}
 
                         </div>
 
                     </article>
                 `;
-
             }
         ).join("");
-
 }
 
 
@@ -622,33 +413,68 @@ function renderExperience(items) {
             "experience-list"
         );
 
-
     if (!container) {
+        console.warn(
+            "Experience container #experience-list was not found."
+        );
         return;
     }
 
+    console.log(
+        "Rendering experience:",
+        items
+    );
+
+    if (!Array.isArray(items)) {
+
+        console.warn(
+            "Experience data is not an array:",
+            items
+        );
+
+        container.innerHTML = `
+            <div class="empty-state">
+                <p>
+                    Professional experience will be updated shortly.
+                </p>
+            </div>
+        `;
+
+        return;
+    }
+
+    /*
+     * Remove completely empty rows.
+     */
 
     const activeItems =
-        Array.isArray(items)
-            ? CMS.sort(items)
-            : [];
+        CMS.sort(
+            items.filter(item => {
 
+                if (!item || typeof item !== "object") {
+                    return false;
+                }
+
+                return (
+                    CMS.value(item, "title") ||
+                    CMS.value(item, "company") ||
+                    CMS.value(item, "description")
+                );
+            })
+        );
 
     if (!activeItems.length) {
 
         container.innerHTML = `
             <div class="empty-state">
                 <p>
-                    Professional experience
-                    will be updated shortly.
+                    Professional experience will be updated shortly.
                 </p>
             </div>
         `;
 
         return;
-
     }
-
 
     container.innerHTML =
         activeItems.map(
@@ -658,8 +484,7 @@ function renderExperience(items) {
                     CMS.value(
                         item,
                         "title"
-                    );
-
+                    ) || "IT Professional";
 
                 const company =
                     CMS.value(
@@ -667,13 +492,11 @@ function renderExperience(items) {
                         "company"
                     );
 
-
                 const location =
                     CMS.value(
                         item,
                         "location"
                     );
-
 
                 const start =
                     CMS.value(
@@ -681,13 +504,11 @@ function renderExperience(items) {
                         "start"
                     );
 
-
                 const end =
                     CMS.value(
                         item,
                         "end"
                     );
-
 
                 const current =
                     CMS.boolean(
@@ -698,95 +519,97 @@ function renderExperience(items) {
                         false
                     );
 
-
                 const description =
                     CMS.value(
                         item,
                         "description"
                     );
 
+                /*
+                 * Date display
+                 */
 
-                const dateDisplay =
-                    current
-                        ? `${start} — Present`
-                        : `${start}${end ? ` — ${end}` : ""}`;
+                let dateDisplay = "";
 
+                if (current) {
+
+                    dateDisplay =
+                        start
+                            ? `${start} — Present`
+                            : "Present";
+
+                } else if (start && end) {
+
+                    dateDisplay =
+                        `${start} — ${end}`;
+
+                } else if (start) {
+
+                    dateDisplay =
+                        start;
+
+                } else if (end) {
+
+                    dateDisplay =
+                        end;
+                }
 
                 return `
-                    <article
-                        class="experience-item reveal"
-                    >
+                    <article class="experience-item reveal">
 
-                        <div
-                            class="experience-index"
-                        >
-                            ${String(index + 1)
-                                .padStart(2, "0")}
+                        <div class="experience-index">
+                            ${String(index + 1).padStart(2, "0")}
                         </div>
 
+                        <div class="experience-main">
 
-                        <div
-                            class="experience-main"
-                        >
-
-                            <div
-                                class="experience-header"
-                            >
+                            <div class="experience-header">
 
                                 <div>
 
                                     <h3>
-                                        ${CMS.escape(
-                                            role
-                                        )}
+                                        ${CMS.escape(role)}
                                     </h3>
 
-                                    <p
-                                        class="experience-company"
-                                    >
-                                        ${CMS.escape(
-                                            company
-                                        )}
-                                    </p>
+                                    ${
+                                        company
+                                            ? `
+                                                <p class="experience-company">
+                                                    ${CMS.escape(company)}
+                                                </p>
+                                              `
+                                            : ""
+                                    }
 
                                 </div>
 
-
-                                <span
-                                    class="experience-date"
-                                >
-                                    ${CMS.escape(
-                                        dateDisplay
-                                    )}
-                                </span>
+                                ${
+                                    dateDisplay
+                                        ? `
+                                            <span class="experience-date">
+                                                ${CMS.escape(dateDisplay)}
+                                            </span>
+                                          `
+                                        : ""
+                                }
 
                             </div>
-
 
                             ${
                                 location
                                     ? `
-                                        <div
-                                            class="experience-location"
-                                        >
-                                            ${CMS.escape(
-                                                location
-                                            )}
+                                        <div class="experience-location">
+                                            ${CMS.escape(location)}
                                         </div>
                                       `
                                     : ""
                             }
 
-
                             ${
                                 description
                                     ? `
-                                        <p
-                                            class="experience-description"
-                                        >
-                                            ${CMS.text(
-                                                description
-                                            )}
+                                        <p class="experience-description">
+                                            ${CMS.text(description)}
                                         </p>
                                       `
                                     : ""
@@ -796,10 +619,12 @@ function renderExperience(items) {
 
                     </article>
                 `;
-
             }
         ).join("");
 
+    console.log(
+        `Experience rendered successfully: ${activeItems.length} item(s).`
+    );
 }
 
 
@@ -814,17 +639,14 @@ function renderProjects(items) {
             "projects-grid"
         );
 
-
     if (!container) {
         return;
     }
-
 
     const activeItems =
         Array.isArray(items)
             ? CMS.sort(items)
             : [];
-
 
     if (!activeItems.length) {
 
@@ -837,9 +659,7 @@ function renderProjects(items) {
         `;
 
         return;
-
     }
-
 
     container.innerHTML =
         activeItems.map(
@@ -851,20 +671,17 @@ function renderProjects(items) {
                         "title"
                     );
 
-
                 const category =
                     CMS.value(
                         item,
                         "category"
                     );
 
-
                 const description =
                     CMS.value(
                         item,
                         "description"
                     );
-
 
                 const technologies =
                     CMS.list(
@@ -874,86 +691,62 @@ function renderProjects(items) {
                         )
                     );
 
-
                 const featured =
                     CMS.isFeatured(item);
-
 
                 return `
                     <article
                         class="
                             project-card
-                            ${featured
-                                ? "project-featured"
-                                : ""}
+                            ${featured ? "project-featured" : ""}
                             reveal
                         "
                     >
 
-                        <div
-                            class="project-number"
-                        >
-                            ${String(index + 1)
-                                .padStart(2, "0")}
+                        <div class="project-number">
+                            ${String(index + 1).padStart(2, "0")}
                         </div>
 
-
-                        <div
-                            class="project-content"
-                        >
+                        <div class="project-content">
 
                             ${
                                 category
                                     ? `
-                                        <span
-                                            class="project-category"
-                                        >
-                                            ${CMS.escape(
-                                                category
-                                            )}
+                                        <span class="project-category">
+                                            ${CMS.escape(category)}
                                         </span>
                                       `
                                     : ""
                             }
 
-
                             <h3>
                                 ${CMS.escape(title)}
                             </h3>
-
 
                             ${
                                 description
                                     ? `
                                         <p>
-                                            ${CMS.text(
-                                                description
-                                            )}
+                                            ${CMS.text(description)}
                                         </p>
                                       `
                                     : ""
                             }
 
-
                             ${
                                 technologies.length
                                     ? `
-                                        <div
-                                            class="project-tags"
-                                        >
+                                        <div class="project-tags">
 
                                             ${technologies
                                                 .map(
                                                     tech => `
                                                         <span>
-                                                            ${CMS.escape(
-                                                                tech
-                                                            )}
+                                                            ${CMS.escape(tech)}
                                                         </span>
                                                     `
                                                 )
-                                                .join("")
-                                            }
+                                                .join("")}
 
                                         </div>
                                       `
@@ -964,10 +757,8 @@ function renderProjects(items) {
 
                     </article>
                 `;
-
             }
         ).join("");
-
 }
 
 
@@ -982,33 +773,27 @@ function renderSkills(items) {
             "skills-grid"
         );
 
-
     if (!container) {
         return;
     }
-
 
     const activeItems =
         Array.isArray(items)
             ? CMS.sort(items)
             : [];
 
-
     if (!activeItems.length) {
 
         container.innerHTML = `
             <div class="empty-state">
                 <p>
-                    Technical capabilities
-                    will be updated shortly.
+                    Technical capabilities will be updated shortly.
                 </p>
             </div>
         `;
 
         return;
-
     }
-
 
     const grouped =
         CMS.groupBy(
@@ -1016,31 +801,23 @@ function renderSkills(items) {
             "category"
         );
 
-
     container.innerHTML =
         Object.entries(grouped)
             .map(
                 ([category, categoryItems]) => `
 
-                    <div
-                        class="skills-group reveal"
-                    >
+                    <div class="skills-group reveal">
 
                         <h3>
                             ${CMS.escape(category)}
                         </h3>
 
-
-                        <div
-                            class="skills-list"
-                        >
+                        <div class="skills-list">
 
                             ${categoryItems
                                 .map(
                                     item => `
-                                        <span
-                                            class="skill-item"
-                                        >
+                                        <span class="skill-item">
                                             ${CMS.escape(
                                                 CMS.value(
                                                     item,
@@ -1050,17 +827,14 @@ function renderSkills(items) {
                                         </span>
                                     `
                                 )
-                                .join("")
-                            }
+                                .join("")}
 
                         </div>
 
                     </div>
-
                 `
             )
             .join("");
-
 }
 
 
@@ -1075,33 +849,27 @@ function renderCertifications(items) {
             "certifications-grid"
         );
 
-
     if (!container) {
         return;
     }
-
 
     const activeItems =
         Array.isArray(items)
             ? CMS.sort(items)
             : [];
 
-
     if (!activeItems.length) {
 
         container.innerHTML = `
             <div class="empty-state">
                 <p>
-                    Certifications will be
-                    updated shortly.
+                    Certifications will be updated shortly.
                 </p>
             </div>
         `;
 
         return;
-
     }
-
 
     container.innerHTML =
         activeItems.map(
@@ -1113,13 +881,11 @@ function renderCertifications(items) {
                         "name"
                     );
 
-
                 const provider =
                     CMS.value(
                         item,
                         "provider"
                     );
-
 
                 const date =
                     CMS.value(
@@ -1127,32 +893,20 @@ function renderCertifications(items) {
                         "date"
                     );
 
-
                 return `
-                    <article
-                        class="certification-card reveal"
-                    >
+                    <article class="certification-card reveal">
 
-                        <div
-                            class="certification-top"
-                        >
+                        <div class="certification-top">
 
-                            <span
-                                class="certification-mark"
-                            >
+                            <span class="certification-mark">
                                 ✓
                             </span>
-
 
                             ${
                                 date
                                     ? `
-                                        <span
-                                            class="certification-date"
-                                        >
-                                            ${CMS.escape(
-                                                date
-                                            )}
+                                        <span class="certification-date">
+                                            ${CMS.escape(date)}
                                         </span>
                                       `
                                     : ""
@@ -1160,19 +914,15 @@ function renderCertifications(items) {
 
                         </div>
 
-
                         <h3>
                             ${CMS.escape(name)}
                         </h3>
-
 
                         ${
                             provider
                                 ? `
                                     <p>
-                                        ${CMS.escape(
-                                            provider
-                                        )}
+                                        ${CMS.escape(provider)}
                                     </p>
                                   `
                                 : ""
@@ -1180,10 +930,8 @@ function renderCertifications(items) {
 
                     </article>
                 `;
-
             }
         ).join("");
-
 }
 
 
@@ -1198,51 +946,84 @@ function renderEducation(items) {
             "education-list"
         );
 
-
     if (!container) {
+        console.warn(
+            "Education container #education-list was not found."
+        );
         return;
     }
 
+    console.log(
+        "Rendering education:",
+        items
+    );
+
+    if (!Array.isArray(items)) {
+
+        console.warn(
+            "Education data is not an array:",
+            items
+        );
+
+        container.innerHTML = `
+            <div class="empty-state">
+                <p>
+                    Education information will be updated shortly.
+                </p>
+            </div>
+        `;
+
+        return;
+    }
+
+    /*
+     * Remove completely empty rows.
+     */
 
     const activeItems =
-        Array.isArray(items)
-            ? CMS.sort(items)
-            : [];
+        CMS.sort(
+            items.filter(item => {
 
+                if (!item || typeof item !== "object") {
+                    return false;
+                }
+
+                return (
+                    CMS.value(item, "institution") ||
+                    CMS.value(item, "qualification") ||
+                    CMS.value(item, "field")
+                );
+            })
+        );
 
     if (!activeItems.length) {
 
         container.innerHTML = `
             <div class="empty-state">
                 <p>
-                    Education information
-                    will be updated shortly.
+                    Education information will be updated shortly.
                 </p>
             </div>
         `;
 
         return;
-
     }
-
 
     container.innerHTML =
         activeItems.map(
-            item => {
+            (item, index) => {
 
                 const institution =
                     CMS.value(
                         item,
                         "institution"
-                    );
-
+                    ) || "Institution";
 
                 const qualification =
                     CMS.value(
                         item,
                         "qualification"
-                    );
-
+                    ) || "Qualification";
 
                 const field =
                     CMS.value(
@@ -1250,13 +1031,11 @@ function renderEducation(items) {
                         "field"
                     );
 
-
                 const start =
                     CMS.value(
                         item,
                         "start"
                     );
-
 
                 const end =
                     CMS.value(
@@ -1264,61 +1043,71 @@ function renderEducation(items) {
                         "end"
                     );
 
+                /*
+                 * Education period
+                 */
 
-                const period =
-                    `${start}${end
-                        ? ` — ${end}`
-                        : ""}`;
+                let period = "";
 
+                if (start && end) {
+
+                    period =
+                        `${start} — ${end}`;
+
+                } else if (start) {
+
+                    period =
+                        start;
+
+                } else if (end) {
+
+                    period =
+                        end;
+                }
 
                 return `
-                    <article
-                        class="education-item reveal"
-                    >
+                    <article class="education-item reveal">
 
-                        <div
-                            class="education-period"
-                        >
-                            ${CMS.escape(period)}
-                        </div>
+                        ${
+                            period
+                                ? `
+                                    <div class="education-period">
+                                        ${CMS.escape(period)}
+                                    </div>
+                                  `
+                                : ""
+                        }
 
-
-                        <div
-                            class="education-content"
-                        >
+                        <div class="education-content">
 
                             <h3>
-                                ${CMS.escape(
-                                    qualification
-                                )}
+                                ${CMS.escape(qualification)}
                             </h3>
 
+                            ${
+                                field
+                                    ? `
+                                        <p class="education-field">
+                                            ${CMS.escape(field)}
+                                        </p>
+                                      `
+                                    : ""
+                            }
 
-                            <p
-                                class="education-field"
-                            >
-                                ${CMS.escape(
-                                    field
-                                )}
-                            </p>
-
-
-                            <p
-                                class="education-institution"
-                            >
-                                ${CMS.escape(
-                                    institution
-                                )}
+                            <p class="education-institution">
+                                ${CMS.escape(institution)}
                             </p>
 
                         </div>
 
                     </article>
                 `;
-
             }
         ).join("");
 
+    console.log(
+        `Education rendered successfully: ${activeItems.length} item(s).`
+    );
 }
 
 
@@ -1332,13 +1121,11 @@ function setupContactLinks(profile) {
         return;
     }
 
-
     const email =
         CMS.value(
             profile,
             "email"
         );
-
 
     const linkedin =
         CMS.value(
@@ -1346,31 +1133,26 @@ function setupContactLinks(profile) {
             "linkedin"
         );
 
-
     const github =
         CMS.value(
             profile,
             "github"
         );
 
-
     const emailLink =
         document.getElementById(
             "email-link"
         );
-
 
     const linkedinLink =
         document.getElementById(
             "linkedin-link"
         );
 
-
     const githubLink =
         document.getElementById(
             "github-link"
         );
-
 
     if (
         emailLink &&
@@ -1379,9 +1161,7 @@ function setupContactLinks(profile) {
 
         emailLink.href =
             `mailto:${email}`;
-
     }
-
 
     if (
         linkedinLink &&
@@ -1396,9 +1176,7 @@ function setupContactLinks(profile) {
 
         linkedinLink.rel =
             "noopener noreferrer";
-
     }
-
 
     if (
         githubLink &&
@@ -1413,9 +1191,7 @@ function setupContactLinks(profile) {
 
         githubLink.rel =
             "noopener noreferrer";
-
     }
-
 }
 
 
@@ -1430,11 +1206,9 @@ function setupCalendar(profile) {
             "calendar-link"
         );
 
-
     if (!calendarLink) {
         return;
     }
-
 
     const calendarUrl =
         (
@@ -1443,7 +1217,6 @@ function setupCalendar(profile) {
         )
             ? SITE_CONFIG.CALENDAR_BOOKING_URL
             : "";
-
 
     if (calendarUrl) {
 
@@ -1458,14 +1231,7 @@ function setupCalendar(profile) {
 
     } else {
 
-        /*
-         * Calendar is not configured yet.
-         * We keep the button usable without
-         * sending visitors to an invalid URL.
-         */
-
-        calendarLink.href =
-            "#";
+        calendarLink.href = "#";
 
         calendarLink.addEventListener(
             "click",
@@ -1476,12 +1242,9 @@ function setupCalendar(profile) {
                 console.info(
                     "Google Calendar booking is not configured yet."
                 );
-
             }
         );
-
     }
-
 }
 
 
@@ -1496,22 +1259,17 @@ function setupNavigation() {
             "mobile-menu-button"
         );
 
-
     const nav =
         document.getElementById(
             "nav-links"
         );
 
-
     if (
         !menuButton ||
         !nav
     ) {
-
         return;
-
     }
-
 
     menuButton.addEventListener(
         "click",
@@ -1522,22 +1280,16 @@ function setupNavigation() {
                     "active"
                 );
 
-
             menuButton.classList.toggle(
                 "active"
             );
 
-
             menuButton.setAttribute(
                 "aria-expanded",
-                active
-                    ? "true"
-                    : "false"
+                active ? "true" : "false"
             );
-
         }
     );
-
 
     nav.querySelectorAll("a")
         .forEach(link => {
@@ -1558,12 +1310,9 @@ function setupNavigation() {
                         "aria-expanded",
                         "false"
                     );
-
                 }
             );
-
         });
-
 }
 
 
@@ -1588,36 +1337,28 @@ function setupSmoothScrolling() {
                             .getAttribute("href")
                             ?.substring(1);
 
-
                     if (!targetId) {
                         return;
                     }
-
 
                     const target =
                         document.getElementById(
                             targetId
                         );
 
-
                     if (!target) {
                         return;
                     }
 
-
                     event.preventDefault();
-
 
                     target.scrollIntoView({
                         behavior: "smooth",
                         block: "start"
                     });
-
                 }
             );
-
         });
-
 }
 
 
@@ -1632,11 +1373,9 @@ function setupRevealAnimations() {
             ".reveal"
         );
 
-
     if (!elements.length) {
         return;
     }
-
 
     if (
         !("IntersectionObserver" in window)
@@ -1648,14 +1387,11 @@ function setupRevealAnimations() {
                 element.classList.add(
                     "visible"
                 );
-
             }
         );
 
         return;
-
     }
-
 
     const observer =
         new IntersectionObserver(
@@ -1672,16 +1408,12 @@ function setupRevealAnimations() {
                                 "visible"
                             );
 
-
                             observer.unobserve(
                                 entry.target
                             );
-
                         }
-
                     }
                 );
-
             },
             {
                 threshold: 0.12,
@@ -1689,17 +1421,14 @@ function setupRevealAnimations() {
             }
         );
 
-
     elements.forEach(
         element => {
 
             observer.observe(
                 element
             );
-
         }
     );
-
 }
 
 
@@ -1710,9 +1439,7 @@ function setupRevealAnimations() {
 function setupCurrentYear() {
 
     const year =
-        new Date()
-            .getFullYear();
-
+        new Date().getFullYear();
 
     document
         .querySelectorAll(
@@ -1723,10 +1450,8 @@ function setupCurrentYear() {
 
                 element.textContent =
                     year;
-
             }
         );
-
 }
 
 
@@ -1741,11 +1466,9 @@ function setupBackToTop() {
             "back-to-top"
         );
 
-
     if (!button) {
         return;
     }
-
 
     const updateVisibility =
         () => {
@@ -1763,11 +1486,8 @@ function setupBackToTop() {
                 button.classList.remove(
                     "visible"
                 );
-
             }
-
         };
-
 
     window.addEventListener(
         "scroll",
@@ -1777,7 +1497,6 @@ function setupBackToTop() {
         }
     );
 
-
     button.addEventListener(
         "click",
         () => {
@@ -1786,13 +1505,10 @@ function setupBackToTop() {
                 top: 0,
                 behavior: "smooth"
             });
-
         }
     );
 
-
     updateVisibility();
-
 }
 
 
@@ -1810,21 +1526,16 @@ function setText(
             elementId
         );
 
-
     if (
         !element ||
         value === undefined ||
         value === null
     ) {
-
         return;
-
     }
-
 
     element.textContent =
         value;
-
 }
 
 
@@ -1839,11 +1550,9 @@ function hideLoader() {
             "page-loader"
         );
 
-
     if (!loader) {
         return;
     }
-
 
     setTimeout(
         () => {
@@ -1851,7 +1560,6 @@ function hideLoader() {
             loader.classList.add(
                 "hidden"
             );
-
 
             setTimeout(
                 () => {
@@ -1865,7 +1573,6 @@ function hideLoader() {
         },
         250
     );
-
 }
 
 
@@ -1876,10 +1583,8 @@ function hideLoader() {
 function showCMSFallback() {
 
     console.warn(
-        "CMS rendering failed. " +
-        "Static page content will remain visible."
+        "CMS rendering failed. Static page content will remain visible."
     );
-
 
     const containers = [
 
@@ -1892,7 +1597,6 @@ function showCMSFallback() {
 
     ];
 
-
     containers.forEach(
         id => {
 
@@ -1901,11 +1605,9 @@ function showCMSFallback() {
                     id
                 );
 
-
             if (!element) {
                 return;
             }
-
 
             if (
                 !element.innerHTML.trim()
@@ -1914,17 +1616,13 @@ function showCMSFallback() {
                 element.innerHTML = `
                     <div class="empty-state">
                         <p>
-                            Content is temporarily
-                            unavailable.
+                            Content is temporarily unavailable.
                         </p>
                     </div>
                 `;
-
             }
-
         }
     );
-
 }
 
 
@@ -1941,7 +1639,6 @@ window.addEventListener(
             event.error ||
             event.message
         );
-
     }
 );
 
@@ -1954,7 +1651,6 @@ window.addEventListener(
             "Unhandled promise rejection:",
             event.reason
         );
-
     }
 );
 
@@ -1975,18 +1671,15 @@ window.addEventListener(
                         "page-loader"
                     );
 
-
                 if (loader) {
 
                     loader.classList.add(
                         "hidden"
                     );
-
                 }
 
             },
             1500
         );
-
     }
 );
