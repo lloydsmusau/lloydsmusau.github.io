@@ -1,11 +1,20 @@
 /* =========================================================
    LLOYDS MUSAU PORTFOLIO
    Main Application
+   Version: CMS-driven frontend
    ========================================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
-    initializeSite();
-});
+document.addEventListener("DOMContentLoaded", initializeSite);
+
+
+/* =========================================================
+   GLOBAL APPLICATION STATE
+   ========================================================= */
+
+const SITE_STATE = {
+    cms: null,
+    initialized: false
+};
 
 
 /* =========================================================
@@ -16,28 +25,55 @@ async function initializeSite() {
 
     try {
 
-        console.log("Initializing Lloyds Musau portfolio...");
+        console.log(
+            "Initializing Lloyds Musau portfolio..."
+        );
+
 
         /*
-         * Set static configuration first.
+         * Load CMS first.
+         * The website should be driven by the
+         * Google Sheets content layer.
          */
-        setupCalendar();
-        setupContactLinks();
-        setupNavigation();
 
-        /*
-         * Load Google Sheets CMS.
-         */
         const data = await CMS.load();
 
-        console.log("Portfolio CMS:", data);
+        SITE_STATE.cms = data;
+
+
+        console.log(
+            "Portfolio CMS:",
+            data
+        );
+
 
         /*
-         * Render CMS-driven sections.
+         * Basic site configuration.
          */
+
+        applySiteMetadata(data);
+
+        applySettings(data.settings);
+
+
+        /*
+         * Static UI systems.
+         */
+
+        setupNavigation();
+
+        setupCalendar(data.profile);
+
+        setupContactLinks(data.profile);
+
+
+        /*
+         * Render CMS-driven content.
+         */
+
         renderProfile(data.profile);
 
-        renderExpertise(data.expertise);
+        renderExpertise(data.skills);
 
         renderExperience(data.experience);
 
@@ -45,191 +81,533 @@ async function initializeSite() {
 
         renderSkills(data.skills);
 
-        renderCertifications(data.certifications);
+        renderCertifications(
+            data.certifications
+        );
 
-        renderEducation(data.education);
+        renderEducation(
+            data.education
+        );
+
 
         /*
-         * Activate animations.
+         * Interactive systems.
          */
+
         setupRevealAnimations();
 
-        /*
-         * Remove loading screen.
-         */
-        hideLoader();
+        setupSmoothScrolling();
 
-        console.log("Portfolio initialized successfully.");
+        setupCurrentYear();
+
+        setupBackToTop();
+
+
+        /*
+         * Site successfully initialized.
+         */
+
+        SITE_STATE.initialized = true;
+
+
+        console.log(
+            "Portfolio initialized successfully."
+        );
+
+
+        hideLoader();
 
     } catch (error) {
 
-        console.error("Portfolio initialization failed:", error);
+        console.error(
+            "Portfolio initialization failed:",
+            error
+        );
+
 
         /*
-         * IMPORTANT:
-         * Do not leave the visitor staring at the LM loader
-         * forever if Google Sheets fails.
+         * Keep the static HTML usable if
+         * the CMS becomes temporarily unavailable.
          */
+
         showCMSFallback();
+
+        setupNavigation();
+
+        setupSmoothScrolling();
 
         setupRevealAnimations();
 
+        setupCurrentYear();
+
+        setupBackToTop();
+
         hideLoader();
+
     }
+
 }
 
 
 /* =========================================================
-   PROFILE
+   SITE METADATA
+   ========================================================= */
+
+function applySiteMetadata(data) {
+
+    if (!data) {
+        return;
+    }
+
+
+    const profile =
+        data.profile || {};
+
+    const settings =
+        data.settings || {};
+
+
+    const siteName =
+        CMS.value(
+            settings,
+            "site_name"
+        ) ||
+        CMS.value(
+            profile,
+            "name"
+        ) ||
+        "Lloyds Musau";
+
+
+    /*
+     * Browser title.
+     */
+
+    document.title =
+        `${siteName} — IT Administrator & IT Operations Professional`;
+
+
+    /*
+     * Meta description.
+     */
+
+    const description =
+        CMS.value(
+            profile,
+            "hero_text",
+            "hero_title",
+            "about",
+            "tagline"
+        );
+
+
+    if (description) {
+
+        let meta =
+            document.querySelector(
+                'meta[name="description"]'
+            );
+
+
+        if (!meta) {
+
+            meta =
+                document.createElement("meta");
+
+            meta.name =
+                "description";
+
+            document.head.appendChild(meta);
+
+        }
+
+
+        meta.content =
+            description;
+
+    }
+
+}
+
+
+/* =========================================================
+   SETTINGS
+   ========================================================= */
+
+function applySettings(settings) {
+
+    if (!settings) {
+        return;
+    }
+
+
+    const visibilityMap = {
+
+        show_experience:
+            "experience-section",
+
+        show_projects:
+            "projects-section",
+
+        show_certifications:
+            "certifications-section",
+
+        show_skills:
+            "skills-section",
+
+        show_education:
+            "education-section"
+
+    };
+
+
+    Object.entries(
+        visibilityMap
+    ).forEach(
+        ([setting, sectionId]) => {
+
+            const section =
+                document.getElementById(
+                    sectionId
+                );
+
+
+            if (!section) {
+                return;
+            }
+
+
+            const visible =
+                CMS.boolean(
+                    settings[setting],
+                    true
+                );
+
+
+            section.hidden =
+                !visible;
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   PROFILE / HERO
    ========================================================= */
 
 function renderProfile(profile) {
 
-    if (!profile || typeof profile !== "object") {
+    if (
+        !profile ||
+        typeof profile !== "object"
+    ) {
+
         return;
+
     }
+
+
+    /*
+     * Name.
+     */
+
+    setText(
+        "profile-name",
+        CMS.value(
+            profile,
+            "name"
+        )
+    );
+
+
+    setText(
+        "hero-name",
+        CMS.value(
+            profile,
+            "name"
+        )
+    );
+
+
+    /*
+     * Professional title.
+     */
+
+    const title =
+        CMS.value(
+            profile,
+            "title"
+        );
+
+
+    setText(
+        "profile-title",
+        title
+    );
+
+
+    setText(
+        "hero-title",
+        CMS.value(
+            profile,
+            "hero_title"
+        ) || title
+    );
+
+
+    /*
+     * Tagline.
+     */
+
+    setText(
+        "hero-tagline",
+        CMS.value(
+            profile,
+            "tagline"
+        )
+    );
+
+
+    /*
+     * Location.
+     */
+
+    setText(
+        "profile-location",
+        CMS.value(
+            profile,
+            "location"
+        )
+    );
+
+
+    /*
+     * Hero description.
+     */
+
+    const heroText =
+        CMS.value(
+            profile,
+            "hero_text",
+            "hero_description",
+            "tagline"
+        );
+
 
     const heroDescription =
-        document.getElementById("hero-description");
+        document.getElementById(
+            "hero-description"
+        );
+
+
+    if (
+        heroDescription &&
+        heroText
+    ) {
+
+        heroDescription.innerHTML =
+            CMS.text(heroText);
+
+    }
+
+
+    /*
+     * About.
+     */
+
+    const about =
+        CMS.value(
+            profile,
+            "about"
+        );
+
 
     const aboutText =
-        document.getElementById("about-text");
+        document.getElementById(
+            "about-text"
+        );
 
 
-    /*
-     * Hero description
-     */
-    const heroText = CMS.value(
-        profile,
-        "Hero Description",
-        "hero_description",
-        "HeroDescription",
-        "Tagline",
-        "tagline",
-        "Professional Summary",
-        "professional_summary"
-    );
+    if (
+        aboutText &&
+        about
+    ) {
 
-    if (heroDescription && heroText) {
-        heroDescription.textContent = heroText;
+        aboutText.innerHTML =
+            CMS.text(about);
+
     }
 
 
     /*
-     * About section
+     * Profile image.
      */
-    const about = CMS.value(
-        profile,
-        "About",
-        "about",
-        "About Text",
-        "about_text",
-        "Bio",
-        "bio",
-        "Description",
-        "description",
-        "Professional Summary",
-        "professional_summary"
-    );
 
-    if (aboutText && about) {
-        aboutText.innerHTML = CMS.text(about);
+    const image =
+        CMS.value(
+            profile,
+            "profile_image",
+            "image",
+            "photo"
+        );
+
+
+    if (image) {
+
+        document
+            .querySelectorAll(
+                "[data-profile-image]"
+            )
+            .forEach(
+                element => {
+
+                    element.src =
+                        image;
+
+                    element.alt =
+                        CMS.value(
+                            profile,
+                            "name"
+                        ) ||
+                        "Lloyds Musau";
+
+                }
+            );
+
     }
 
-
-    /*
-     * Update page title if supplied by CMS.
-     */
-    const title = CMS.value(
-        profile,
-        "Site Title",
-        "site_title",
-        "Title",
-        "title"
-    );
-
-    if (title) {
-        document.title = title;
-    }
 }
 
 
 /* =========================================================
    EXPERTISE
+   Derived from Skills.category
    ========================================================= */
 
 function renderExpertise(items) {
 
     const container =
-        document.getElementById("expertise-grid");
+        document.getElementById(
+            "expertise-grid"
+        );
+
 
     if (!container) {
         return;
     }
 
-    const activeItems =
-        CMS.sort(CMS.activeItems(items));
 
-    if (!activeItems.length) {
+    if (!Array.isArray(items)) {
+
+        container.innerHTML =
+            "";
+
+        return;
+
+    }
+
+
+    /*
+     * Only featured skills contribute
+     * to the specialist-area display.
+     */
+
+    const featured =
+        items.filter(
+            item =>
+                CMS.isFeatured(item)
+        );
+
+
+    /*
+     * If nothing is featured, use
+     * all available skills.
+     */
+
+    const source =
+        featured.length
+            ? featured
+            : items;
+
+
+    const grouped =
+        CMS.groupBy(
+            CMS.sort(source),
+            "category"
+        );
+
+
+    const categories =
+        Object.entries(grouped);
+
+
+    if (!categories.length) {
 
         container.innerHTML = `
             <div class="empty-state">
-                <p>Expertise information will be updated shortly.</p>
+                <p>
+                    Specialist areas will be updated shortly.
+                </p>
             </div>
         `;
 
         return;
+
     }
 
 
     container.innerHTML =
-        activeItems.map((item, index) => {
+        categories.map(
+            ([category, skills], index) => {
 
-            const title = CMS.value(
-                item,
-                "Title",
-                "title",
-                "Name",
-                "name",
-                "Area",
-                "area",
-                "Expertise",
-                "expertise"
-            );
-
-            const description = CMS.value(
-                item,
-                "Description",
-                "description",
-                "Details",
-                "details",
-                "Summary",
-                "summary"
-            );
-
-            const number =
-                String(index + 1).padStart(2, "0");
+                const number =
+                    String(index + 1)
+                        .padStart(2, "0");
 
 
-            return `
-                <article class="expertise-card reveal">
+                return `
+                    <article
+                        class="expertise-card reveal"
+                    >
 
-                    <div class="card-number">
-                        ${CMS.escape(number)}
-                    </div>
+                        <span
+                            class="card-number"
+                        >
+                            ${number}
+                        </span>
 
-                    <h3>
-                        ${CMS.escape(title)}
-                    </h3>
+                        <h3>
+                            ${CMS.escape(category)}
+                        </h3>
 
-                    <p>
-                        ${CMS.text(description)}
-                    </p>
+                        <div
+                            class="expertise-skills"
+                        >
 
-                </article>
-            `;
+                            ${skills
+                                .map(skill => `
+                                    <span>
+                                        ${CMS.escape(
+                                            CMS.value(
+                                                skill,
+                                                "skill"
+                                            )
+                                        )}
+                                    </span>
+                                `)
+                                .join("")
+                            }
 
-        }).join("");
+                        </div>
+
+                    </article>
+                `;
+
+            }
+        ).join("");
+
 }
 
 
@@ -240,157 +618,188 @@ function renderExpertise(items) {
 function renderExperience(items) {
 
     const container =
-        document.getElementById("experience-list");
+        document.getElementById(
+            "experience-list"
+        );
+
 
     if (!container) {
         return;
     }
 
+
     const activeItems =
-        CMS.sort(CMS.activeItems(items));
+        Array.isArray(items)
+            ? CMS.sort(items)
+            : [];
+
 
     if (!activeItems.length) {
 
         container.innerHTML = `
             <div class="empty-state">
-                <p>Professional experience will be updated shortly.</p>
+                <p>
+                    Professional experience
+                    will be updated shortly.
+                </p>
             </div>
         `;
 
         return;
+
     }
 
 
     container.innerHTML =
-        activeItems.map((item, index) => {
+        activeItems.map(
+            (item, index) => {
 
-            const role = CMS.value(
-                item,
-                "Role",
-                "role",
-                "Position",
-                "position",
-                "Job Title",
-                "job_title",
-                "Title",
-                "title"
-            );
-
-            const company = CMS.value(
-                item,
-                "Company",
-                "company",
-                "Organisation",
-                "organisation",
-                "Organization",
-                "organization",
-                "Employer",
-                "employer"
-            );
-
-            const startDate = CMS.value(
-                item,
-                "Start Date",
-                "start_date",
-                "Start",
-                "start",
-                "From",
-                "from"
-            );
-
-            const endDate = CMS.value(
-                item,
-                "End Date",
-                "end_date",
-                "End",
-                "end",
-                "To",
-                "to"
-            );
-
-            const period = CMS.value(
-                item,
-                "Period",
-                "period",
-                "Duration",
-                "duration"
-            );
-
-            const description = CMS.value(
-                item,
-                "Description",
-                "description",
-                "Responsibilities",
-                "responsibilities",
-                "Summary",
-                "summary"
-            );
-
-            const location = CMS.value(
-                item,
-                "Location",
-                "location"
-            );
+                const role =
+                    CMS.value(
+                        item,
+                        "title"
+                    );
 
 
-            let dateDisplay = period;
-
-            if (!dateDisplay && (startDate || endDate)) {
-
-                dateDisplay =
-                    `${startDate}${startDate && endDate ? " — " : ""}${endDate}`;
-            }
+                const company =
+                    CMS.value(
+                        item,
+                        "company"
+                    );
 
 
-            return `
-                <article class="experience-item reveal">
+                const location =
+                    CMS.value(
+                        item,
+                        "location"
+                    );
 
-                    <div class="experience-index">
-                        ${String(index + 1).padStart(2, "0")}
-                    </div>
 
-                    <div class="experience-main">
+                const start =
+                    CMS.value(
+                        item,
+                        "start"
+                    );
 
-                        <div class="experience-header">
 
-                            <div>
+                const end =
+                    CMS.value(
+                        item,
+                        "end"
+                    );
 
-                                <h3>
-                                    ${CMS.escape(role)}
-                                </h3>
 
-                                <p class="experience-company">
-                                    ${CMS.escape(company)}
-                                </p>
+                const current =
+                    CMS.boolean(
+                        CMS.value(
+                            item,
+                            "current"
+                        ),
+                        false
+                    );
+
+
+                const description =
+                    CMS.value(
+                        item,
+                        "description"
+                    );
+
+
+                const dateDisplay =
+                    current
+                        ? `${start} — Present`
+                        : `${start}${end ? ` — ${end}` : ""}`;
+
+
+                return `
+                    <article
+                        class="experience-item reveal"
+                    >
+
+                        <div
+                            class="experience-index"
+                        >
+                            ${String(index + 1)
+                                .padStart(2, "0")}
+                        </div>
+
+
+                        <div
+                            class="experience-main"
+                        >
+
+                            <div
+                                class="experience-header"
+                            >
+
+                                <div>
+
+                                    <h3>
+                                        ${CMS.escape(
+                                            role
+                                        )}
+                                    </h3>
+
+                                    <p
+                                        class="experience-company"
+                                    >
+                                        ${CMS.escape(
+                                            company
+                                        )}
+                                    </p>
+
+                                </div>
+
+
+                                <span
+                                    class="experience-date"
+                                >
+                                    ${CMS.escape(
+                                        dateDisplay
+                                    )}
+                                </span>
 
                             </div>
 
-                            <span class="experience-date">
-                                ${CMS.escape(dateDisplay)}
-                            </span>
+
+                            ${
+                                location
+                                    ? `
+                                        <div
+                                            class="experience-location"
+                                        >
+                                            ${CMS.escape(
+                                                location
+                                            )}
+                                        </div>
+                                      `
+                                    : ""
+                            }
+
+
+                            ${
+                                description
+                                    ? `
+                                        <p
+                                            class="experience-description"
+                                        >
+                                            ${CMS.text(
+                                                description
+                                            )}
+                                        </p>
+                                      `
+                                    : ""
+                            }
 
                         </div>
 
-                        ${
-                            location
-                                ? `
-                                    <div class="experience-location">
-                                        ${CMS.escape(location)}
-                                    </div>
-                                  `
-                                : ""
-                        }
+                    </article>
+                `;
 
-                        <p class="experience-description">
-                            ${CMS.text(description)}
-                        </p>
+            }
+        ).join("");
 
-                    </div>
-
-                </article>
-            `;
-
-        }).join("");
 }
 
 
@@ -401,148 +810,164 @@ function renderExperience(items) {
 function renderProjects(items) {
 
     const container =
-        document.getElementById("projects-grid");
+        document.getElementById(
+            "projects-grid"
+        );
+
 
     if (!container) {
         return;
     }
 
+
     const activeItems =
-        CMS.sort(CMS.activeItems(items));
+        Array.isArray(items)
+            ? CMS.sort(items)
+            : [];
+
 
     if (!activeItems.length) {
 
         container.innerHTML = `
             <div class="empty-state">
-                <p>Projects will be added shortly.</p>
+                <p>
+                    Projects will be added shortly.
+                </p>
             </div>
         `;
 
         return;
+
     }
 
 
     container.innerHTML =
-        activeItems.map((item, index) => {
+        activeItems.map(
+            (item, index) => {
 
-            const title = CMS.value(
-                item,
-                "Title",
-                "title",
-                "Project",
-                "project",
-                "Name",
-                "name"
-            );
-
-            const description = CMS.value(
-                item,
-                "Description",
-                "description",
-                "Summary",
-                "summary",
-                "Details",
-                "details"
-            );
-
-            const category = CMS.value(
-                item,
-                "Category",
-                "category",
-                "Type",
-                "type"
-            );
-
-            const technologies = CMS.list(
-                CMS.value(
-                    item,
-                    "Technologies",
-                    "technologies",
-                    "Tech Stack",
-                    "tech_stack",
-                    "Skills",
-                    "skills",
-                    "Tools",
-                    "tools"
-                )
-            );
-
-            const link = CMS.value(
-                item,
-                "Link",
-                "link",
-                "URL",
-                "url",
-                "Project URL",
-                "project_url"
-            );
+                const title =
+                    CMS.value(
+                        item,
+                        "title"
+                    );
 
 
-            return `
-                <article class="project-card reveal">
+                const category =
+                    CMS.value(
+                        item,
+                        "category"
+                    );
 
-                    <div class="project-number">
-                        ${String(index + 1).padStart(2, "0")}
-                    </div>
 
-                    <div class="project-content">
+                const description =
+                    CMS.value(
+                        item,
+                        "description"
+                    );
 
-                        ${
-                            category
-                                ? `
-                                    <span class="project-category">
-                                        ${CMS.escape(category)}
-                                    </span>
-                                  `
-                                : ""
-                        }
 
-                        <h3>
-                            ${CMS.escape(title)}
-                        </h3>
+                const technologies =
+                    CMS.list(
+                        CMS.value(
+                            item,
+                            "technologies"
+                        )
+                    );
 
-                        <p>
-                            ${CMS.text(description)}
-                        </p>
 
-                        ${
-                            technologies.length
-                                ? `
-                                    <div class="project-tags">
+                const featured =
+                    CMS.isFeatured(item);
 
-                                        ${technologies.map(tech => `
-                                            <span>
-                                                ${CMS.escape(tech)}
-                                            </span>
-                                        `).join("")}
 
-                                    </div>
-                                  `
-                                : ""
-                        }
+                return `
+                    <article
+                        class="
+                            project-card
+                            ${featured
+                                ? "project-featured"
+                                : ""}
+                            reveal
+                        "
+                    >
 
-                        ${
-                            link
-                                ? `
-                                    <a
-                                        href="${CMS.escape(link)}"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        class="text-link"
-                                    >
-                                        View project
-                                        <span>↗</span>
-                                    </a>
-                                  `
-                                : ""
-                        }
+                        <div
+                            class="project-number"
+                        >
+                            ${String(index + 1)
+                                .padStart(2, "0")}
+                        </div>
 
-                    </div>
 
-                </article>
-            `;
+                        <div
+                            class="project-content"
+                        >
 
-        }).join("");
+                            ${
+                                category
+                                    ? `
+                                        <span
+                                            class="project-category"
+                                        >
+                                            ${CMS.escape(
+                                                category
+                                            )}
+                                        </span>
+                                      `
+                                    : ""
+                            }
+
+
+                            <h3>
+                                ${CMS.escape(title)}
+                            </h3>
+
+
+                            ${
+                                description
+                                    ? `
+                                        <p>
+                                            ${CMS.text(
+                                                description
+                                            )}
+                                        </p>
+                                      `
+                                    : ""
+                            }
+
+
+                            ${
+                                technologies.length
+                                    ? `
+                                        <div
+                                            class="project-tags"
+                                        >
+
+                                            ${technologies
+                                                .map(
+                                                    tech => `
+                                                        <span>
+                                                            ${CMS.escape(
+                                                                tech
+                                                            )}
+                                                        </span>
+                                                    `
+                                                )
+                                                .join("")
+                                            }
+
+                                        </div>
+                                      `
+                                    : ""
+                            }
+
+                        </div>
+
+                    </article>
+                `;
+
+            }
+        ).join("");
+
 }
 
 
@@ -553,92 +978,89 @@ function renderProjects(items) {
 function renderSkills(items) {
 
     const container =
-        document.getElementById("skills-grid");
+        document.getElementById(
+            "skills-grid"
+        );
+
 
     if (!container) {
         return;
     }
 
+
     const activeItems =
-        CMS.sort(CMS.activeItems(items));
+        Array.isArray(items)
+            ? CMS.sort(items)
+            : [];
+
 
     if (!activeItems.length) {
 
         container.innerHTML = `
             <div class="empty-state">
-                <p>Technical skills will be updated shortly.</p>
+                <p>
+                    Technical capabilities
+                    will be updated shortly.
+                </p>
             </div>
         `;
 
         return;
+
     }
 
 
-    /*
-     * If your sheet has categories,
-     * group skills by category.
-     */
-
-    const grouped = {};
-
-    activeItems.forEach(item => {
-
-        const category = CMS.value(
-            item,
-            "Category",
-            "category",
-            "Group",
-            "group",
-            "Area",
-            "area"
-        ) || "Technical Skills";
-
-        if (!grouped[category]) {
-            grouped[category] = [];
-        }
-
-        grouped[category].push(item);
-    });
+    const grouped =
+        CMS.groupBy(
+            activeItems,
+            "category"
+        );
 
 
     container.innerHTML =
-        Object.entries(grouped).map(([category, categoryItems]) => {
+        Object.entries(grouped)
+            .map(
+                ([category, categoryItems]) => `
 
-            return `
-                <div class="skills-group reveal">
+                    <div
+                        class="skills-group reveal"
+                    >
 
-                    <h3>
-                        ${CMS.escape(category)}
-                    </h3>
+                        <h3>
+                            ${CMS.escape(category)}
+                        </h3>
 
-                    <div class="skills-list">
 
-                        ${categoryItems.map(item => {
+                        <div
+                            class="skills-list"
+                        >
 
-                            const skill = CMS.value(
-                                item,
-                                "Skill",
-                                "skill",
-                                "Name",
-                                "name",
-                                "Title",
-                                "title"
-                            );
+                            ${categoryItems
+                                .map(
+                                    item => `
+                                        <span
+                                            class="skill-item"
+                                        >
+                                            ${CMS.escape(
+                                                CMS.value(
+                                                    item,
+                                                    "skill"
+                                                )
+                                            )}
+                                        </span>
+                                    `
+                                )
+                                .join("")
+                            }
 
-                            return `
-                                <span class="skill-item">
-                                    ${CMS.escape(skill)}
-                                </span>
-                            `;
-
-                        }).join("")}
+                        </div>
 
                     </div>
 
-                </div>
-            `;
+                `
+            )
+            .join("");
 
-        }).join("");
 }
 
 
@@ -649,129 +1071,119 @@ function renderSkills(items) {
 function renderCertifications(items) {
 
     const container =
-        document.getElementById("certifications-grid");
+        document.getElementById(
+            "certifications-grid"
+        );
+
 
     if (!container) {
         return;
     }
 
+
     const activeItems =
-        CMS.sort(CMS.activeItems(items));
+        Array.isArray(items)
+            ? CMS.sort(items)
+            : [];
+
 
     if (!activeItems.length) {
 
         container.innerHTML = `
             <div class="empty-state">
-                <p>Certifications will be updated shortly.</p>
+                <p>
+                    Certifications will be
+                    updated shortly.
+                </p>
             </div>
         `;
 
         return;
+
     }
 
 
     container.innerHTML =
-        activeItems.map(item => {
+        activeItems.map(
+            item => {
 
-            const name = CMS.value(
-                item,
-                "Name",
-                "name",
-                "Certification",
-                "certification",
-                "Title",
-                "title"
-            );
-
-            const issuer = CMS.value(
-                item,
-                "Issuer",
-                "issuer",
-                "Organisation",
-                "organisation",
-                "Organization",
-                "organization",
-                "Provider",
-                "provider"
-            );
-
-            const date = CMS.value(
-                item,
-                "Date",
-                "date",
-                "Year",
-                "year"
-            );
-
-            const credential = CMS.value(
-                item,
-                "Credential",
-                "credential",
-                "Credential ID",
-                "credential_id",
-                "Certificate URL",
-                "certificate_url",
-                "URL",
-                "url"
-            );
+                const name =
+                    CMS.value(
+                        item,
+                        "name"
+                    );
 
 
-            return `
-                <article class="certification-card reveal">
+                const provider =
+                    CMS.value(
+                        item,
+                        "provider"
+                    );
 
-                    <div class="certification-top">
 
-                        <span class="certification-mark">
-                            ✓
-                        </span>
+                const date =
+                    CMS.value(
+                        item,
+                        "date"
+                    );
+
+
+                return `
+                    <article
+                        class="certification-card reveal"
+                    >
+
+                        <div
+                            class="certification-top"
+                        >
+
+                            <span
+                                class="certification-mark"
+                            >
+                                ✓
+                            </span>
+
+
+                            ${
+                                date
+                                    ? `
+                                        <span
+                                            class="certification-date"
+                                        >
+                                            ${CMS.escape(
+                                                date
+                                            )}
+                                        </span>
+                                      `
+                                    : ""
+                            }
+
+                        </div>
+
+
+                        <h3>
+                            ${CMS.escape(name)}
+                        </h3>
+
 
                         ${
-                            date
+                            provider
                                 ? `
-                                    <span class="certification-date">
-                                        ${CMS.escape(date)}
-                                    </span>
+                                    <p>
+                                        ${CMS.escape(
+                                            provider
+                                        )}
+                                    </p>
                                   `
                                 : ""
                         }
 
-                    </div>
+                    </article>
+                `;
 
-                    <h3>
-                        ${CMS.escape(name)}
-                    </h3>
+            }
+        ).join("");
 
-                    ${
-                        issuer
-                            ? `
-                                <p>
-                                    ${CMS.escape(issuer)}
-                                </p>
-                              `
-                            : ""
-                    }
-
-                    ${
-                        credential &&
-                        credential.startsWith("http")
-                            ? `
-                                <a
-                                    href="${CMS.escape(credential)}"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="text-link"
-                                >
-                                    View credential
-                                    <span>↗</span>
-                                </a>
-                              `
-                            : ""
-                    }
-
-                </article>
-            `;
-
-        }).join("");
 }
 
 
@@ -782,142 +1194,131 @@ function renderCertifications(items) {
 function renderEducation(items) {
 
     const container =
-        document.getElementById("education-list");
+        document.getElementById(
+            "education-list"
+        );
+
 
     if (!container) {
         return;
     }
 
+
     const activeItems =
-        CMS.sort(CMS.activeItems(items));
+        Array.isArray(items)
+            ? CMS.sort(items)
+            : [];
+
 
     if (!activeItems.length) {
 
         container.innerHTML = `
             <div class="empty-state">
-                <p>Education information will be updated shortly.</p>
+                <p>
+                    Education information
+                    will be updated shortly.
+                </p>
             </div>
         `;
 
         return;
+
     }
 
 
     container.innerHTML =
-        activeItems.map(item => {
+        activeItems.map(
+            item => {
 
-            const institution = CMS.value(
-                item,
-                "Institution",
-                "institution",
-                "School",
-                "school",
-                "University",
-                "university",
-                "Organisation",
-                "organisation"
-            );
-
-            const qualification = CMS.value(
-                item,
-                "Qualification",
-                "qualification",
-                "Degree",
-                "degree",
-                "Program",
-                "program",
-                "Course",
-                "course",
-                "Title",
-                "title"
-            );
-
-            const period = CMS.value(
-                item,
-                "Period",
-                "period",
-                "Year",
-                "year",
-                "Date",
-                "date"
-            );
-
-            const description = CMS.value(
-                item,
-                "Description",
-                "description",
-                "Details",
-                "details"
-            );
+                const institution =
+                    CMS.value(
+                        item,
+                        "institution"
+                    );
 
 
-            return `
-                <article class="education-item reveal">
-
-                    <div class="education-period">
-                        ${CMS.escape(period)}
-                    </div>
-
-                    <div class="education-content">
-
-                        <h3>
-                            ${CMS.escape(qualification)}
-                        </h3>
-
-                        <p class="education-institution">
-                            ${CMS.escape(institution)}
-                        </p>
-
-                        ${
-                            description
-                                ? `
-                                    <p>
-                                        ${CMS.text(description)}
-                                    </p>
-                                  `
-                                : ""
-                        }
-
-                    </div>
-
-                </article>
-            `;
-
-        }).join("");
-}
+                const qualification =
+                    CMS.value(
+                        item,
+                        "qualification"
+                    );
 
 
-/* =========================================================
-   GOOGLE CALENDAR
-   ========================================================= */
+                const field =
+                    CMS.value(
+                        item,
+                        "field"
+                    );
 
-function setupCalendar() {
 
-    const calendarLink =
-        document.getElementById("calendar-link");
+                const start =
+                    CMS.value(
+                        item,
+                        "start"
+                    );
 
-    if (!calendarLink) {
-        return;
-    }
 
-    if (
-        typeof SITE_CONFIG !== "undefined" &&
-        SITE_CONFIG.CALENDAR_BOOKING_URL
-    ) {
+                const end =
+                    CMS.value(
+                        item,
+                        "end"
+                    );
 
-        calendarLink.href =
-            SITE_CONFIG.CALENDAR_BOOKING_URL;
 
-        calendarLink.target = "_blank";
+                const period =
+                    `${start}${end
+                        ? ` — ${end}`
+                        : ""}`;
 
-        calendarLink.rel =
-            "noopener noreferrer";
 
-    } else {
+                return `
+                    <article
+                        class="education-item reveal"
+                    >
 
-        calendarLink.href = "#";
+                        <div
+                            class="education-period"
+                        >
+                            ${CMS.escape(period)}
+                        </div>
 
-    }
+
+                        <div
+                            class="education-content"
+                        >
+
+                            <h3>
+                                ${CMS.escape(
+                                    qualification
+                                )}
+                            </h3>
+
+
+                            <p
+                                class="education-field"
+                            >
+                                ${CMS.escape(
+                                    field
+                                )}
+                            </p>
+
+
+                            <p
+                                class="education-institution"
+                            >
+                                ${CMS.escape(
+                                    institution
+                                )}
+                            </p>
+
+                        </div>
+
+                    </article>
+                `;
+
+            }
+        ).join("");
+
 }
 
 
@@ -925,45 +1326,162 @@ function setupCalendar() {
    CONTACT LINKS
    ========================================================= */
 
-function setupContactLinks() {
+function setupContactLinks(profile) {
+
+    if (!profile) {
+        return;
+    }
+
+
+    const email =
+        CMS.value(
+            profile,
+            "email"
+        );
+
+
+    const linkedin =
+        CMS.value(
+            profile,
+            "linkedin"
+        );
+
+
+    const github =
+        CMS.value(
+            profile,
+            "github"
+        );
+
 
     const emailLink =
-        document.getElementById("email-link");
+        document.getElementById(
+            "email-link"
+        );
+
 
     const linkedinLink =
-        document.getElementById("linkedin-link");
+        document.getElementById(
+            "linkedin-link"
+        );
+
 
     const githubLink =
-        document.getElementById("github-link");
+        document.getElementById(
+            "github-link"
+        );
 
 
-    /*
-     * These are deliberately kept here rather than
-     * hard-coded throughout the HTML.
-     */
-
-    if (emailLink) {
+    if (
+        emailLink &&
+        email
+    ) {
 
         emailLink.href =
-            "mailto:lloydsmusau02@gmail.com";
+            `mailto:${email}`;
 
     }
 
 
-    if (linkedinLink) {
+    if (
+        linkedinLink &&
+        linkedin
+    ) {
 
         linkedinLink.href =
-            "https://linkedin.com/in/lloydsmusau";
+            linkedin;
+
+        linkedinLink.target =
+            "_blank";
+
+        linkedinLink.rel =
+            "noopener noreferrer";
 
     }
 
 
-    if (githubLink) {
+    if (
+        githubLink &&
+        github
+    ) {
 
         githubLink.href =
-            "https://github.com/lloydsmusau";
+            github;
+
+        githubLink.target =
+            "_blank";
+
+        githubLink.rel =
+            "noopener noreferrer";
 
     }
+
+}
+
+
+/* =========================================================
+   GOOGLE CALENDAR
+   ========================================================= */
+
+function setupCalendar(profile) {
+
+    const calendarLink =
+        document.getElementById(
+            "calendar-link"
+        );
+
+
+    if (!calendarLink) {
+        return;
+    }
+
+
+    const calendarUrl =
+        (
+            typeof SITE_CONFIG !== "undefined" &&
+            SITE_CONFIG.CALENDAR_BOOKING_URL
+        )
+            ? SITE_CONFIG.CALENDAR_BOOKING_URL
+            : "";
+
+
+    if (calendarUrl) {
+
+        calendarLink.href =
+            calendarUrl;
+
+        calendarLink.target =
+            "_blank";
+
+        calendarLink.rel =
+            "noopener noreferrer";
+
+    } else {
+
+        /*
+         * Calendar is not configured yet.
+         * We keep the button usable without
+         * sending visitors to an invalid URL.
+         */
+
+        calendarLink.href =
+            "#";
+
+        calendarLink.addEventListener(
+            "click",
+            event => {
+
+                event.preventDefault();
+
+                console.info(
+                    "Google Calendar booking is not configured yet."
+                );
+
+            }
+        );
+
+    }
+
 }
 
 
@@ -974,40 +1492,132 @@ function setupContactLinks() {
 function setupNavigation() {
 
     const menuButton =
-        document.getElementById("mobile-menu-button");
+        document.getElementById(
+            "mobile-menu-button"
+        );
+
 
     const nav =
-        document.getElementById("nav-links");
+        document.getElementById(
+            "nav-links"
+        );
 
-    if (!menuButton || !nav) {
+
+    if (
+        !menuButton ||
+        !nav
+    ) {
+
         return;
+
     }
 
 
-    menuButton.addEventListener("click", () => {
+    menuButton.addEventListener(
+        "click",
+        () => {
 
-        nav.classList.toggle("active");
+            const active =
+                nav.classList.toggle(
+                    "active"
+                );
 
-        menuButton.classList.toggle("active");
 
-    });
+            menuButton.classList.toggle(
+                "active"
+            );
 
 
-    /*
-     * Close mobile menu after clicking a link.
-     */
+            menuButton.setAttribute(
+                "aria-expanded",
+                active
+                    ? "true"
+                    : "false"
+            );
 
-    nav.querySelectorAll("a").forEach(link => {
+        }
+    );
 
-        link.addEventListener("click", () => {
 
-            nav.classList.remove("active");
+    nav.querySelectorAll("a")
+        .forEach(link => {
 
-            menuButton.classList.remove("active");
+            link.addEventListener(
+                "click",
+                () => {
+
+                    nav.classList.remove(
+                        "active"
+                    );
+
+                    menuButton.classList.remove(
+                        "active"
+                    );
+
+                    menuButton.setAttribute(
+                        "aria-expanded",
+                        "false"
+                    );
+
+                }
+            );
 
         });
 
-    });
+}
+
+
+/* =========================================================
+   SMOOTH SCROLLING
+   ========================================================= */
+
+function setupSmoothScrolling() {
+
+    document
+        .querySelectorAll(
+            'a[href^="#"]'
+        )
+        .forEach(link => {
+
+            link.addEventListener(
+                "click",
+                event => {
+
+                    const targetId =
+                        link
+                            .getAttribute("href")
+                            ?.substring(1);
+
+
+                    if (!targetId) {
+                        return;
+                    }
+
+
+                    const target =
+                        document.getElementById(
+                            targetId
+                        );
+
+
+                    if (!target) {
+                        return;
+                    }
+
+
+                    event.preventDefault();
+
+
+                    target.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start"
+                    });
+
+                }
+            );
+
+        });
+
 }
 
 
@@ -1018,27 +1628,32 @@ function setupNavigation() {
 function setupRevealAnimations() {
 
     const elements =
-        document.querySelectorAll(".reveal");
+        document.querySelectorAll(
+            ".reveal"
+        );
+
 
     if (!elements.length) {
         return;
     }
 
 
-    /*
-     * If IntersectionObserver isn't available,
-     * show everything immediately.
-     */
+    if (
+        !("IntersectionObserver" in window)
+    ) {
 
-    if (!("IntersectionObserver" in window)) {
+        elements.forEach(
+            element => {
 
-        elements.forEach(element => {
+                element.classList.add(
+                    "visible"
+                );
 
-            element.classList.add("visible");
-
-        });
+            }
+        );
 
         return;
+
     }
 
 
@@ -1046,30 +1661,170 @@ function setupRevealAnimations() {
         new IntersectionObserver(
             entries => {
 
-                entries.forEach(entry => {
+                entries.forEach(
+                    entry => {
 
-                    if (entry.isIntersecting) {
+                        if (
+                            entry.isIntersecting
+                        ) {
 
-                        entry.target.classList.add("visible");
+                            entry.target.classList.add(
+                                "visible"
+                            );
 
-                        observer.unobserve(entry.target);
+
+                            observer.unobserve(
+                                entry.target
+                            );
+
+                        }
 
                     }
-
-                });
+                );
 
             },
             {
-                threshold: 0.12
+                threshold: 0.12,
+                rootMargin: "0px 0px -40px 0px"
             }
         );
 
 
-    elements.forEach(element => {
+    elements.forEach(
+        element => {
 
-        observer.observe(element);
+            observer.observe(
+                element
+            );
 
-    });
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CURRENT YEAR
+   ========================================================= */
+
+function setupCurrentYear() {
+
+    const year =
+        new Date()
+            .getFullYear();
+
+
+    document
+        .querySelectorAll(
+            "[data-current-year]"
+        )
+        .forEach(
+            element => {
+
+                element.textContent =
+                    year;
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   BACK TO TOP
+   ========================================================= */
+
+function setupBackToTop() {
+
+    const button =
+        document.getElementById(
+            "back-to-top"
+        );
+
+
+    if (!button) {
+        return;
+    }
+
+
+    const updateVisibility =
+        () => {
+
+            if (
+                window.scrollY > 600
+            ) {
+
+                button.classList.add(
+                    "visible"
+                );
+
+            } else {
+
+                button.classList.remove(
+                    "visible"
+                );
+
+            }
+
+        };
+
+
+    window.addEventListener(
+        "scroll",
+        updateVisibility,
+        {
+            passive: true
+        }
+    );
+
+
+    button.addEventListener(
+        "click",
+        () => {
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+        }
+    );
+
+
+    updateVisibility();
+
+}
+
+
+/* =========================================================
+   DOM HELPERS
+   ========================================================= */
+
+function setText(
+    elementId,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            elementId
+        );
+
+
+    if (
+        !element ||
+        value === undefined ||
+        value === null
+    ) {
+
+        return;
+
+    }
+
+
+    element.textContent =
+        value;
+
 }
 
 
@@ -1080,29 +1835,37 @@ function setupRevealAnimations() {
 function hideLoader() {
 
     const loader =
-        document.getElementById("page-loader");
+        document.getElementById(
+            "page-loader"
+        );
+
 
     if (!loader) {
         return;
     }
 
 
-    /*
-     * Give the browser a short moment to paint
-     * the rendered portfolio before removing loader.
-     */
+    setTimeout(
+        () => {
 
-    setTimeout(() => {
+            loader.classList.add(
+                "hidden"
+            );
 
-        loader.classList.add("hidden");
 
-        setTimeout(() => {
+            setTimeout(
+                () => {
 
-            loader.remove();
+                    loader.remove();
 
-        }, 700);
+                },
+                700
+            );
 
-    }, 250);
+        },
+        250
+    );
+
 }
 
 
@@ -1113,18 +1876,10 @@ function hideLoader() {
 function showCMSFallback() {
 
     console.warn(
-        "Google Sheets CMS could not be loaded. " +
-        "Displaying the static portfolio content."
+        "CMS rendering failed. " +
+        "Static page content will remain visible."
     );
 
-
-    /*
-     * We intentionally DON'T replace the entire page
-     * with an error message.
-     *
-     * The static content already contained in index.html
-     * should remain usable.
-     */
 
     const containers = [
 
@@ -1138,35 +1893,38 @@ function showCMSFallback() {
     ];
 
 
-    containers.forEach(id => {
+    containers.forEach(
+        id => {
 
-        const element =
-            document.getElementById(id);
+            const element =
+                document.getElementById(
+                    id
+                );
 
-        if (!element) {
-            return;
+
+            if (!element) {
+                return;
+            }
+
+
+            if (
+                !element.innerHTML.trim()
+            ) {
+
+                element.innerHTML = `
+                    <div class="empty-state">
+                        <p>
+                            Content is temporarily
+                            unavailable.
+                        </p>
+                    </div>
+                `;
+
+            }
+
         }
+    );
 
-
-        /*
-         * Only display a small message if the section
-         * contains no content.
-         */
-
-        if (!element.innerHTML.trim()) {
-
-            element.innerHTML = `
-                <div class="empty-state">
-                    <p>
-                        Content is temporarily unavailable.
-                        Please check back shortly.
-                    </p>
-                </div>
-            `;
-
-        }
-
-    });
 }
 
 
@@ -1174,14 +1932,18 @@ function showCMSFallback() {
    GLOBAL ERROR HANDLING
    ========================================================= */
 
-window.addEventListener("error", event => {
+window.addEventListener(
+    "error",
+    event => {
 
-    console.error(
-        "Website error:",
-        event.error || event.message
-    );
+        console.error(
+            "Website error:",
+            event.error ||
+            event.message
+        );
 
-});
+    }
+);
 
 
 window.addEventListener(
@@ -1196,21 +1958,35 @@ window.addEventListener(
     }
 );
 
+
 /* =========================================================
    LOADER FAILSAFE
    ========================================================= */
 
-window.addEventListener("load", () => {
+window.addEventListener(
+    "load",
+    () => {
 
-    setTimeout(() => {
+        setTimeout(
+            () => {
 
-        const loader =
-            document.getElementById("page-loader");
+                const loader =
+                    document.getElementById(
+                        "page-loader"
+                    );
 
-        if (loader) {
-            loader.classList.add("hidden");
-        }
 
-    }, 1000);
+                if (loader) {
 
-});
+                    loader.classList.add(
+                        "hidden"
+                    );
+
+                }
+
+            },
+            1500
+        );
+
+    }
+);
