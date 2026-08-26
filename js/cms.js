@@ -227,48 +227,39 @@ const CMS = {
 
     settingsToObject(rows) {
 
-        const settings = {};
+    const settings = {};
 
+    if (!Array.isArray(rows)) {
+        return settings;
+    }
 
-        if (!Array.isArray(rows)) {
+    rows.forEach(row => {
 
-            return settings;
-
+        if (!row || typeof row !== "object") {
+            return;
         }
 
+        const key =
+            row.key ??
+            row.Key ??
+            "";
 
-        rows.forEach(row => {
+        const value =
+            row.value ??
+            row.Value ??
+            "";
 
-            if (!row || typeof row !== "object") {
-                return;
-            }
+        if (!key) {
+            return;
+        }
 
+        settings[String(key).trim()] =
+            String(value).trim();
 
-            Object.entries(row).forEach(
-                ([key, value]) => {
+    });
 
-                    if (
-                        key &&
-                        value !== undefined &&
-                        value !== null
-                    ) {
-
-                        settings[
-                            String(key).trim()
-                        ] =
-                            String(value).trim();
-
-                    }
-
-                }
-            );
-
-        });
-
-
-        return settings;
-
-    },
+    return settings;
+},
 
 
     /* =====================================================
