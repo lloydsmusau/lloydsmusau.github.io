@@ -1,14 +1,10 @@
 /* =========================================================
    LLOYDS MUSAU PORTFOLIO
    Google Sheets CMS
-   Multi-section API loader
    ========================================================= */
 
 const CMS = {
 
-    /*
-     * API endpoint
-     */
     apiUrl: SITE_CONFIG.CMS_API,
 
 
@@ -24,20 +20,14 @@ const CMS = {
 
         try {
 
-            /*
-             * The Apps Script API returns one section at a time.
-             *
-             * Therefore we request each CMS section separately.
-             */
-
             const sections = [
                 "profile",
-                "expertise",
                 "experience",
                 "projects",
                 "skills",
                 "certifications",
-                "education"
+                "education",
+                "settings"
             ];
 
 
@@ -52,12 +42,12 @@ const CMS = {
             const cms = {
 
                 profile: results[0],
-                expertise: results[1],
-                experience: results[2],
-                projects: results[3],
-                skills: results[4],
-                certifications: results[5],
-                education: results[6]
+                experience: results[1],
+                projects: results[2],
+                skills: results[3],
+                certifications: results[4],
+                education: results[5],
+                settings: results[6]
 
             };
 
@@ -117,23 +107,24 @@ const CMS = {
         if (!result.success) {
 
             throw new Error(
-                `CMS returned an error for section "${section}"`
+                `CMS returned an error for section "${section}": ${
+                    result.error || "Unknown error"
+                }`
             );
 
         }
 
 
         /*
-         * Profile is returned as:
+         * Profile uses:
          *
-         * [
-         *   { key: "name", value: "Lloyds Musau" }
-         * ]
+         * key | value
          *
          * Convert it into:
          *
          * {
-         *   name: "Lloyds Musau"
+         *   name: "Lloyds Musau",
+         *   title: "IT Administrator"
          * }
          */
 
@@ -147,12 +138,28 @@ const CMS = {
 
 
         /*
-         * Other sections remain arrays.
+         * Settings currently contains
+         * site configuration values.
+         */
+
+        if (section === "settings") {
+
+            return this.settingsToObject(
+                result.data
+            );
+
+        }
+
+
+        /*
+         * All other sections are arrays.
          */
 
         if (Array.isArray(result.data)) {
 
-            return result.data;
+            return this.sort(
+                result.data
+            );
 
         }
 
@@ -201,13 +208,65 @@ const CMS = {
             }
 
 
-            profile[String(key).trim()] =
+            profile[
+                String(key).trim()
+            ] =
                 String(value).trim();
 
         });
 
 
         return profile;
+
+    },
+
+
+    /* =====================================================
+       SETTINGS ARRAY → OBJECT
+       ===================================================== */
+
+    settingsToObject(rows) {
+
+        const settings = {};
+
+
+        if (!Array.isArray(rows)) {
+
+            return settings;
+
+        }
+
+
+        rows.forEach(row => {
+
+            if (!row || typeof row !== "object") {
+                return;
+            }
+
+
+            Object.entries(row).forEach(
+                ([key, value]) => {
+
+                    if (
+                        key &&
+                        value !== undefined &&
+                        value !== null
+                    ) {
+
+                        settings[
+                            String(key).trim()
+                        ] =
+                            String(value).trim();
+
+                    }
+
+                }
+            );
+
+        });
+
+
+        return settings;
 
     },
 
@@ -254,7 +313,39 @@ const CMS = {
 
 
     /* =====================================================
-       COMMA-SEPARATED LIST
+       BOOLEAN HELPER
+       ===================================================== */
+
+    boolean(value, defaultValue = false) {
+
+        if (
+            value === undefined ||
+            value === null ||
+            value === ""
+        ) {
+
+            return defaultValue;
+
+        }
+
+
+        return [
+            "true",
+            "1",
+            "yes",
+            "y",
+            "on"
+        ].includes(
+            String(value)
+                .trim()
+                .toLowerCase()
+        );
+
+    },
+
+
+    /* =====================================================
+       LIST HELPER
        ===================================================== */
 
     list(value) {
@@ -274,13 +365,8 @@ const CMS = {
 
 
         return String(value)
-
             .split(",")
-
-            .map(item =>
-                item.trim()
-            )
-
+            .map(item => item.trim())
             .filter(Boolean);
 
     },
@@ -354,72 +440,25 @@ const CMS = {
 
 
     /* =====================================================
-       ACTIVE RECORD CHECK
+       ACTIVE / FEATURED CHECK
        ===================================================== */
 
-    isActive(item) {
+    isFeatured(item) {
 
-        const active =
+        return this.boolean(
             this.value(
                 item,
-                "Active",
-                "active",
-                "Published",
-                "published",
-                "Status",
-                "status"
-            );
-
-
-        /*
-         * If no status column exists,
-         * assume the item is published.
-         */
-
-        if (!active) {
-
-            return true;
-
-        }
-
-
-        return ![
-            "false",
-            "no",
-            "0",
-            "inactive",
-            "draft",
-            "hidden"
-        ].includes(
-            active.toLowerCase()
+                "featured",
+                "Featured"
+            ),
+            false
         );
 
     },
 
 
     /* =====================================================
-       FILTER ACTIVE RECORDS
-       ===================================================== */
-
-    activeItems(items) {
-
-        if (!Array.isArray(items)) {
-
-            return [];
-
-        }
-
-
-        return items.filter(
-            item =>
-                this.isActive(item)
-        );
-
-    },
-
-
-    /* =====================================================
-       SORT RECORDS
+       SORT
        ===================================================== */
 
     sort(items) {
@@ -435,42 +474,88 @@ const CMS = {
             (a, b) => {
 
                 const orderA =
-                    Number(
+                    parseInt(
                         this.value(
                             a,
-                            "Order",
-                            "order",
+                            "sort",
                             "Sort",
-                            "sort"
-                        )
+                            "order",
+                            "Order"
+                        ),
+                        10
                     );
 
 
                 const orderB =
-                    Number(
+                    parseInt(
                         this.value(
                             b,
-                            "Order",
-                            "order",
+                            "sort",
                             "Sort",
-                            "sort"
-                        )
+                            "order",
+                            "Order"
+                        ),
+                        10
                     );
 
 
-                if (
-                    !Number.isNaN(orderA) &&
-                    !Number.isNaN(orderB)
-                ) {
+                const safeA =
+                    Number.isNaN(orderA)
+                        ? 9999
+                        : orderA;
 
-                    return orderA - orderB;
+
+                const safeB =
+                    Number.isNaN(orderB)
+                        ? 9999
+                        : orderB;
+
+
+                return safeA - safeB;
+
+            }
+        );
+
+    },
+
+
+    /* =====================================================
+       GROUP BY CATEGORY
+       ===================================================== */
+
+    groupBy(items, field) {
+
+        if (!Array.isArray(items)) {
+
+            return {};
+
+        }
+
+
+        return items.reduce(
+            (groups, item) => {
+
+                const category =
+                    this.value(
+                        item,
+                        field
+                    ) || "Other";
+
+
+                if (!groups[category]) {
+
+                    groups[category] = [];
 
                 }
 
 
-                return 0;
+                groups[category].push(item);
 
-            }
+
+                return groups;
+
+            },
+            {}
         );
 
     }
