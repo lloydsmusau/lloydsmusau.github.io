@@ -171,6 +171,27 @@ button {
 
 }
 
+/* Safety fallback: never leave visitors stuck on the loader */
+@keyframes loaderFailsafe {
+
+    0%,
+    85% {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    100% {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+
+}
+
+.page-loader {
+    animation: loaderFailsafe 4s forwards;
+}
+
 
 .loader-logo {
 
