@@ -1,14 +1,14 @@
 /* =========================================================
    LLOYDS MUSAU PORTFOLIO
    Main Application
-   Version: CMS-driven frontend
+   CMS-Driven Frontend
    ========================================================= */
 
 document.addEventListener("DOMContentLoaded", initializeSite);
 
 
 /* =========================================================
-   GLOBAL APPLICATION STATE
+   GLOBAL STATE
    ========================================================= */
 
 const SITE_STATE = {
@@ -18,7 +18,7 @@ const SITE_STATE = {
 
 
 /* =========================================================
-   MAIN INITIALIZATION
+   INITIALIZATION
    ========================================================= */
 
 async function initializeSite() {
@@ -27,23 +27,20 @@ async function initializeSite() {
 
         console.log("Initializing Lloyds Musau portfolio...");
 
-        /* Load CMS */
         const data = await CMS.load();
 
         SITE_STATE.cms = data;
 
         console.log("Portfolio CMS:", data);
 
-        /* Site configuration */
         applySiteMetadata(data);
+
         applySettings(data.settings);
 
-        /* Static UI */
         setupNavigation();
         setupCalendar(data.profile);
         setupContactLinks(data.profile);
 
-        /* CMS content */
         renderProfile(data.profile);
         renderExpertise(data.skills);
         renderExperience(data.experience);
@@ -52,7 +49,6 @@ async function initializeSite() {
         renderCertifications(data.certifications);
         renderEducation(data.education);
 
-        /* Interactive systems */
         setupRevealAnimations();
         setupSmoothScrolling();
         setupCurrentYear();
@@ -66,18 +62,24 @@ async function initializeSite() {
 
     } catch (error) {
 
-        console.error(
-            "Portfolio initialization failed:",
-            error
-        );
+        console.error("Portfolio initialization failed:", error);
 
         showCMSFallback();
 
         setupNavigation();
         setupSmoothScrolling();
-        setupRevealAnimations();
         setupCurrentYear();
         setupBackToTop();
+
+        /*
+         * Make static/dynamically-rendered content visible
+         * even if another CMS component fails.
+         */
+        document
+            .querySelectorAll(".reveal")
+            .forEach(element => {
+                element.classList.add("visible");
+            });
 
         hideLoader();
     }
@@ -145,17 +147,35 @@ function applySettings(settings) {
         return;
     }
 
+    /*
+     * IMPORTANT:
+     *
+     * The actual IDs in index.html are:
+     *
+     * experience
+     * projects
+     * certifications
+     * skills
+     * education
+     *
+     * NOT:
+     *
+     * experience-section
+     * education-section
+     */
+
     const visibilityMap = {
 
-        show_experience: "experience-section",
+        show_experience: "experience",
 
-        show_projects: "projects-section",
+        show_projects: "projects",
 
-        show_certifications: "certifications-section",
+        show_certifications: "certifications",
 
-        show_skills: "skills-section",
+        show_skills: "skills",
 
-        show_education: "education-section"
+        show_education: "education"
+
     };
 
     Object.entries(visibilityMap).forEach(
@@ -181,7 +201,7 @@ function applySettings(settings) {
 
 
 /* =========================================================
-   PROFILE / HERO
+   PROFILE
    ========================================================= */
 
 function renderProfile(profile) {
@@ -193,7 +213,6 @@ function renderProfile(profile) {
         return;
     }
 
-    /* Name */
     setText(
         "profile-name",
         CMS.value(profile, "name")
@@ -204,7 +223,6 @@ function renderProfile(profile) {
         CMS.value(profile, "name")
     );
 
-    /* Professional title */
     const title =
         CMS.value(profile, "title");
 
@@ -218,19 +236,16 @@ function renderProfile(profile) {
         CMS.value(profile, "hero_title") || title
     );
 
-    /* Tagline */
     setText(
         "hero-tagline",
         CMS.value(profile, "tagline")
     );
 
-    /* Location */
     setText(
         "profile-location",
         CMS.value(profile, "location")
     );
 
-    /* Hero description */
     const heroText =
         CMS.value(
             profile,
@@ -253,17 +268,11 @@ function renderProfile(profile) {
             CMS.text(heroText);
     }
 
-    /* About */
     const about =
-        CMS.value(
-            profile,
-            "about"
-        );
+        CMS.value(profile, "about");
 
     const aboutText =
-        document.getElementById(
-            "about-text"
-        );
+        document.getElementById("about-text");
 
     if (
         aboutText &&
@@ -274,7 +283,6 @@ function renderProfile(profile) {
             CMS.text(about);
     }
 
-    /* Profile image */
     const image =
         CMS.value(
             profile,
@@ -306,7 +314,6 @@ function renderProfile(profile) {
 
 /* =========================================================
    EXPERTISE
-   Derived from Skills.category
    ========================================================= */
 
 function renderExpertise(items) {
@@ -360,45 +367,50 @@ function renderExpertise(items) {
     }
 
     container.innerHTML =
-        categories.map(
-            ([category, skills], index) => {
+        categories
+            .map(
+                ([category, skills], index) => {
 
-                const number =
-                    String(index + 1)
-                        .padStart(2, "0");
+                    const number =
+                        String(index + 1)
+                            .padStart(2, "0");
 
-                return `
-                    <article class="expertise-card reveal">
+                    return `
+                        <article class="expertise-card reveal">
 
-                        <span class="card-number">
-                            ${number}
-                        </span>
+                            <span class="card-number">
+                                ${number}
+                            </span>
 
-                        <h3>
-                            ${CMS.escape(category)}
-                        </h3>
+                            <h3>
+                                ${CMS.escape(category)}
+                            </h3>
 
-                        <div class="expertise-skills">
+                            <div class="expertise-skills">
 
-                            ${skills
-                                .map(skill => `
-                                    <span>
-                                        ${CMS.escape(
-                                            CMS.value(
-                                                skill,
-                                                "skill"
-                                            )
-                                        )}
-                                    </span>
-                                `)
-                                .join("")}
+                                ${skills
+                                    .map(
+                                        skill => `
+                                            <span>
+                                                ${CMS.escape(
+                                                    CMS.value(
+                                                        skill,
+                                                        "skill"
+                                                    )
+                                                )}
+                                            </span>
+                                        `
+                                    )
+                                    .join("")
+                                }
 
-                        </div>
+                            </div>
 
-                    </article>
-                `;
-            }
-        ).join("");
+                        </article>
+                    `;
+                }
+            )
+            .join("");
 }
 
 
@@ -414,9 +426,11 @@ function renderExperience(items) {
         );
 
     if (!container) {
+
         console.warn(
-            "Experience container #experience-list was not found."
+            "Experience container #experience-list not found."
         );
+
         return;
     }
 
@@ -425,50 +439,18 @@ function renderExperience(items) {
         items
     );
 
-    if (!Array.isArray(items)) {
-
-        console.warn(
-            "Experience data is not an array:",
-            items
-        );
-
-        container.innerHTML = `
-            <div class="empty-state">
-                <p>
-                    Professional experience will be updated shortly.
-                </p>
-            </div>
-        `;
-
-        return;
-    }
-
-    /*
-     * Remove completely empty rows.
-     */
-
     const activeItems =
-        CMS.sort(
-            items.filter(item => {
-
-                if (!item || typeof item !== "object") {
-                    return false;
-                }
-
-                return (
-                    CMS.value(item, "title") ||
-                    CMS.value(item, "company") ||
-                    CMS.value(item, "description")
-                );
-            })
-        );
+        Array.isArray(items)
+            ? CMS.sort(items)
+            : [];
 
     if (!activeItems.length) {
 
         container.innerHTML = `
             <div class="empty-state">
                 <p>
-                    Professional experience will be updated shortly.
+                    Professional experience
+                    will be updated shortly.
                 </p>
             </div>
         `;
@@ -477,150 +459,119 @@ function renderExperience(items) {
     }
 
     container.innerHTML =
-        activeItems.map(
-            (item, index) => {
+        activeItems
+            .map(
+                (item, index) => {
 
-                const role =
-                    CMS.value(
-                        item,
-                        "title"
-                    ) || "IT Professional";
-
-                const company =
-                    CMS.value(
-                        item,
-                        "company"
-                    );
-
-                const location =
-                    CMS.value(
-                        item,
-                        "location"
-                    );
-
-                const start =
-                    CMS.value(
-                        item,
-                        "start"
-                    );
-
-                const end =
-                    CMS.value(
-                        item,
-                        "end"
-                    );
-
-                const current =
-                    CMS.boolean(
+                    const role =
                         CMS.value(
                             item,
-                            "current"
-                        ),
-                        false
-                    );
+                            "title"
+                        );
 
-                const description =
-                    CMS.value(
-                        item,
-                        "description"
-                    );
+                    const company =
+                        CMS.value(
+                            item,
+                            "company"
+                        );
 
-                /*
-                 * Date display
-                 */
+                    const location =
+                        CMS.value(
+                            item,
+                            "location"
+                        );
 
-                let dateDisplay = "";
+                    const start =
+                        CMS.value(
+                            item,
+                            "start"
+                        );
 
-                if (current) {
+                    const end =
+                        CMS.value(
+                            item,
+                            "end"
+                        );
 
-                    dateDisplay =
-                        start
+                    const current =
+                        CMS.boolean(
+                            CMS.value(
+                                item,
+                                "current"
+                            ),
+                            false
+                        );
+
+                    const description =
+                        CMS.value(
+                            item,
+                            "description"
+                        );
+
+                    const dateDisplay =
+                        current
                             ? `${start} — Present`
-                            : "Present";
+                            : `${start}${end ? ` — ${end}` : ""}`;
 
-                } else if (start && end) {
+                    return `
+                        <article
+                            class="experience-item reveal"
+                        >
 
-                    dateDisplay =
-                        `${start} — ${end}`;
+                            <div class="experience-index">
+                                ${String(index + 1)
+                                    .padStart(2, "0")}
+                            </div>
 
-                } else if (start) {
+                            <div class="experience-main">
 
-                    dateDisplay =
-                        start;
+                                <div class="experience-header">
 
-                } else if (end) {
+                                    <div>
 
-                    dateDisplay =
-                        end;
-                }
+                                        <h3>
+                                            ${CMS.escape(role)}
+                                        </h3>
 
-                return `
-                    <article class="experience-item reveal">
+                                        <p class="experience-company">
+                                            ${CMS.escape(company)}
+                                        </p>
 
-                        <div class="experience-index">
-                            ${String(index + 1).padStart(2, "0")}
-                        </div>
+                                    </div>
 
-                        <div class="experience-main">
-
-                            <div class="experience-header">
-
-                                <div>
-
-                                    <h3>
-                                        ${CMS.escape(role)}
-                                    </h3>
-
-                                    ${
-                                        company
-                                            ? `
-                                                <p class="experience-company">
-                                                    ${CMS.escape(company)}
-                                                </p>
-                                              `
-                                            : ""
-                                    }
+                                    <span class="experience-date">
+                                        ${CMS.escape(dateDisplay)}
+                                    </span>
 
                                 </div>
 
                                 ${
-                                    dateDisplay
+                                    location
                                         ? `
-                                            <span class="experience-date">
-                                                ${CMS.escape(dateDisplay)}
-                                            </span>
+                                            <div class="experience-location">
+                                                ${CMS.escape(location)}
+                                            </div>
+                                          `
+                                        : ""
+                                }
+
+                                ${
+                                    description
+                                        ? `
+                                            <p class="experience-description">
+                                                ${CMS.text(description)}
+                                            </p>
                                           `
                                         : ""
                                 }
 
                             </div>
 
-                            ${
-                                location
-                                    ? `
-                                        <div class="experience-location">
-                                            ${CMS.escape(location)}
-                                        </div>
-                                      `
-                                    : ""
-                            }
-
-                            ${
-                                description
-                                    ? `
-                                        <p class="experience-description">
-                                            ${CMS.text(description)}
-                                        </p>
-                                      `
-                                    : ""
-                            }
-
-                        </div>
-
-                    </article>
-                `;
-            }
-        ).join("");
+                        </article>
+                    `;
+                }
+            )
+            .join("");
 
     console.log(
         `Experience rendered successfully: ${activeItems.length} item(s).`
@@ -662,103 +613,109 @@ function renderProjects(items) {
     }
 
     container.innerHTML =
-        activeItems.map(
-            (item, index) => {
+        activeItems
+            .map(
+                (item, index) => {
 
-                const title =
-                    CMS.value(
-                        item,
-                        "title"
-                    );
-
-                const category =
-                    CMS.value(
-                        item,
-                        "category"
-                    );
-
-                const description =
-                    CMS.value(
-                        item,
-                        "description"
-                    );
-
-                const technologies =
-                    CMS.list(
+                    const title =
                         CMS.value(
                             item,
-                            "technologies"
-                        )
-                    );
+                            "title"
+                        );
 
-                const featured =
-                    CMS.isFeatured(item);
+                    const category =
+                        CMS.value(
+                            item,
+                            "category"
+                        );
 
-                return `
-                    <article
-                        class="
-                            project-card
-                            ${featured ? "project-featured" : ""}
-                            reveal
-                        "
-                    >
+                    const description =
+                        CMS.value(
+                            item,
+                            "description"
+                        );
 
-                        <div class="project-number">
-                            ${String(index + 1).padStart(2, "0")}
-                        </div>
+                    const technologies =
+                        CMS.list(
+                            CMS.value(
+                                item,
+                                "technologies"
+                            )
+                        );
 
-                        <div class="project-content">
+                    const featured =
+                        CMS.isFeatured(item);
 
-                            ${
-                                category
-                                    ? `
-                                        <span class="project-category">
-                                            ${CMS.escape(category)}
-                                        </span>
-                                      `
-                                    : ""
-                            }
+                    return `
+                        <article
+                            class="
+                                project-card
+                                ${featured
+                                    ? "project-featured"
+                                    : ""}
+                                reveal
+                            "
+                        >
 
-                            <h3>
-                                ${CMS.escape(title)}
-                            </h3>
+                            <div class="project-number">
+                                ${String(index + 1)
+                                    .padStart(2, "0")}
+                            </div>
 
-                            ${
-                                description
-                                    ? `
-                                        <p>
-                                            ${CMS.text(description)}
-                                        </p>
-                                      `
-                                    : ""
-                            }
+                            <div class="project-content">
 
-                            ${
-                                technologies.length
-                                    ? `
-                                        <div class="project-tags">
+                                ${
+                                    category
+                                        ? `
+                                            <span class="project-category">
+                                                ${CMS.escape(category)}
+                                            </span>
+                                          `
+                                        : ""
+                                }
 
-                                            ${technologies
-                                                .map(
-                                                    tech => `
-                                                        <span>
-                                                            ${CMS.escape(tech)}
-                                                        </span>
-                                                    `
-                                                )
-                                                .join("")}
+                                <h3>
+                                    ${CMS.escape(title)}
+                                </h3>
 
-                                        </div>
-                                      `
-                                    : ""
-                            }
+                                ${
+                                    description
+                                        ? `
+                                            <p>
+                                                ${CMS.text(description)}
+                                            </p>
+                                          `
+                                        : ""
+                                }
 
-                        </div>
+                                ${
+                                    technologies.length
+                                        ? `
+                                            <div class="project-tags">
 
-                    </article>
-                `;
-            }
-        ).join("");
+                                                ${technologies
+                                                    .map(
+                                                        tech => `
+                                                            <span>
+                                                                ${CMS.escape(tech)}
+                                                            </span>
+                                                        `
+                                                    )
+                                                    .join("")
+                                                }
+
+                                            </div>
+                                          `
+                                        : ""
+                                }
+
+                            </div>
+
+                        </article>
+                    `;
+                }
+            )
+            .join("");
 }
 
 
@@ -787,7 +744,8 @@ function renderSkills(items) {
         container.innerHTML = `
             <div class="empty-state">
                 <p>
-                    Technical capabilities will be updated shortly.
+                    Technical capabilities
+                    will be updated shortly.
                 </p>
             </div>
         `;
@@ -827,11 +785,13 @@ function renderSkills(items) {
                                         </span>
                                     `
                                 )
-                                .join("")}
+                                .join("")
+                            }
 
                         </div>
 
                     </div>
+
                 `
             )
             .join("");
@@ -872,66 +832,70 @@ function renderCertifications(items) {
     }
 
     container.innerHTML =
-        activeItems.map(
-            item => {
+        activeItems
+            .map(
+                item => {
 
-                const name =
-                    CMS.value(
-                        item,
-                        "name"
-                    );
+                    const name =
+                        CMS.value(
+                            item,
+                            "name"
+                        );
 
-                const provider =
-                    CMS.value(
-                        item,
-                        "provider"
-                    );
+                    const provider =
+                        CMS.value(
+                            item,
+                            "provider"
+                        );
 
-                const date =
-                    CMS.value(
-                        item,
-                        "date"
-                    );
+                    const date =
+                        CMS.value(
+                            item,
+                            "date"
+                        );
 
-                return `
-                    <article class="certification-card reveal">
+                    return `
+                        <article
+                            class="certification-card reveal"
+                        >
 
-                        <div class="certification-top">
+                            <div class="certification-top">
 
-                            <span class="certification-mark">
-                                ✓
-                            </span>
+                                <span class="certification-mark">
+                                    ✓
+                                </span>
+
+                                ${
+                                    date
+                                        ? `
+                                            <span class="certification-date">
+                                                ${CMS.escape(date)}
+                                            </span>
+                                          `
+                                        : ""
+                                }
+
+                            </div>
+
+                            <h3>
+                                ${CMS.escape(name)}
+                            </h3>
 
                             ${
-                                date
+                                provider
                                     ? `
-                                        <span class="certification-date">
-                                            ${CMS.escape(date)}
-                                        </span>
+                                        <p>
+                                            ${CMS.escape(provider)}
+                                        </p>
                                       `
                                     : ""
                             }
 
-                        </div>
-
-                        <h3>
-                            ${CMS.escape(name)}
-                        </h3>
-
-                        ${
-                            provider
-                                ? `
-                                    <p>
-                                        ${CMS.escape(provider)}
-                                    </p>
-                                  `
-                                : ""
-                        }
-
-                    </article>
-                `;
-            }
-        ).join("");
+                        </article>
+                    `;
+                }
+            )
+            .join("");
 }
 
 
@@ -947,9 +911,11 @@ function renderEducation(items) {
         );
 
     if (!container) {
+
         console.warn(
-            "Education container #education-list was not found."
+            "Education container #education-list not found."
         );
+
         return;
     }
 
@@ -958,50 +924,18 @@ function renderEducation(items) {
         items
     );
 
-    if (!Array.isArray(items)) {
-
-        console.warn(
-            "Education data is not an array:",
-            items
-        );
-
-        container.innerHTML = `
-            <div class="empty-state">
-                <p>
-                    Education information will be updated shortly.
-                </p>
-            </div>
-        `;
-
-        return;
-    }
-
-    /*
-     * Remove completely empty rows.
-     */
-
     const activeItems =
-        CMS.sort(
-            items.filter(item => {
-
-                if (!item || typeof item !== "object") {
-                    return false;
-                }
-
-                return (
-                    CMS.value(item, "institution") ||
-                    CMS.value(item, "qualification") ||
-                    CMS.value(item, "field")
-                );
-            })
-        );
+        Array.isArray(items)
+            ? CMS.sort(items)
+            : [];
 
     if (!activeItems.length) {
 
         container.innerHTML = `
             <div class="empty-state">
                 <p>
-                    Education information will be updated shortly.
+                    Education information
+                    will be updated shortly.
                 </p>
             </div>
         `;
@@ -1010,100 +944,83 @@ function renderEducation(items) {
     }
 
     container.innerHTML =
-        activeItems.map(
-            (item, index) => {
+        activeItems
+            .map(
+                item => {
 
-                const institution =
-                    CMS.value(
-                        item,
-                        "institution"
-                    ) || "Institution";
+                    const institution =
+                        CMS.value(
+                            item,
+                            "institution"
+                        );
 
-                const qualification =
-                    CMS.value(
-                        item,
-                        "qualification"
-                    ) || "Qualification";
+                    const qualification =
+                        CMS.value(
+                            item,
+                            "qualification"
+                        );
 
-                const field =
-                    CMS.value(
-                        item,
-                        "field"
-                    );
+                    const field =
+                        CMS.value(
+                            item,
+                            "field"
+                        );
 
-                const start =
-                    CMS.value(
-                        item,
-                        "start"
-                    );
+                    const start =
+                        CMS.value(
+                            item,
+                            "start"
+                        );
 
-                const end =
-                    CMS.value(
-                        item,
-                        "end"
-                    );
+                    const end =
+                        CMS.value(
+                            item,
+                            "end"
+                        );
 
-                /*
-                 * Education period
-                 */
+                    const period =
+                        `${start}${end
+                            ? ` — ${end}`
+                            : ""}`;
 
-                let period = "";
+                    return `
+                        <article
+                            class="education-item reveal"
+                        >
 
-                if (start && end) {
+                            <div class="education-period">
+                                ${CMS.escape(period)}
+                            </div>
 
-                    period =
-                        `${start} — ${end}`;
+                            <div class="education-content">
 
-                } else if (start) {
+                                <h3>
+                                    ${CMS.escape(
+                                        qualification
+                                    )}
+                                </h3>
 
-                    period =
-                        start;
+                                ${
+                                    field
+                                        ? `
+                                            <p class="education-field">
+                                                ${CMS.escape(field)}
+                                            </p>
+                                          `
+                                        : ""
+                                }
 
-                } else if (end) {
+                                <p class="education-institution">
+                                    ${CMS.escape(institution)}
+                                </p>
 
-                    period =
-                        end;
+                            </div>
+
+                        </article>
+                    `;
                 }
-
-                return `
-                    <article class="education-item reveal">
-
-                        ${
-                            period
-                                ? `
-                                    <div class="education-period">
-                                        ${CMS.escape(period)}
-                                    </div>
-                                  `
-                                : ""
-                        }
-
-                        <div class="education-content">
-
-                            <h3>
-                                ${CMS.escape(qualification)}
-                            </h3>
-
-                            ${
-                                field
-                                    ? `
-                                        <p class="education-field">
-                                            ${CMS.escape(field)}
-                                        </p>
-                                      `
-                                    : ""
-                            }
-
-                            <p class="education-institution">
-                                ${CMS.escape(institution)}
-                            </p>
-
-                        </div>
-
-                    </article>
-                `;
-            }
-        ).join("");
+            )
+            .join("");
 
     console.log(
         `Education rendered successfully: ${activeItems.length} item(s).`
@@ -1377,13 +1294,20 @@ function setupRevealAnimations() {
         return;
     }
 
+    /*
+     * IMPORTANT:
+     *
+     * The content is dynamically inserted after
+     * page load. We explicitly handle every
+     * dynamically-created .reveal element.
+     */
+
     if (
         !("IntersectionObserver" in window)
     ) {
 
         elements.forEach(
             element => {
-
                 element.classList.add(
                     "visible"
                 );
@@ -1416,8 +1340,8 @@ function setupRevealAnimations() {
                 );
             },
             {
-                threshold: 0.12,
-                rootMargin: "0px 0px -40px 0px"
+                threshold: 0.05,
+                rootMargin: "0px 0px 100px 0px"
             }
         );
 
@@ -1439,7 +1363,8 @@ function setupRevealAnimations() {
 function setupCurrentYear() {
 
     const year =
-        new Date().getFullYear();
+        new Date()
+            .getFullYear();
 
     document
         .querySelectorAll(
@@ -1513,7 +1438,7 @@ function setupBackToTop() {
 
 
 /* =========================================================
-   DOM HELPERS
+   DOM HELPER
    ========================================================= */
 
 function setText(
@@ -1601,9 +1526,7 @@ function showCMSFallback() {
         id => {
 
             const element =
-                document.getElementById(
-                    id
-                );
+                document.getElementById(id);
 
             if (!element) {
                 return;
