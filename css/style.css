@@ -3492,13 +3492,61 @@ h1 span {
 }
 
 
-/* =========================================================
-   16. CERTIFICATIONS
-   ========================================================= */
+/* =========================================
+   CERTIFICATIONS
+   Professional credentials / learning record
+========================================= */
 
 .certifications {
-    background: var(--black);
+    position: relative;
+    overflow: hidden;
+    background: var(--black-soft);
 }
+
+/* Subtle horizontal structure */
+.certifications::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    pointer-events: none;
+
+    background-image:
+        linear-gradient(
+            to bottom,
+            rgba(255,255,255,.035) 1px,
+            transparent 1px
+        );
+
+    background-size: 100% 90px;
+
+    opacity: .45;
+}
+
+.certifications .container {
+    position: relative;
+    z-index: 1;
+}
+
+/* -----------------------------------------
+   CERTIFICATIONS HEADER
+----------------------------------------- */
+
+.certifications .section-header {
+    margin-bottom: 70px;
+}
+
+.certifications .section-label {
+    color: #777;
+}
+
+.certifications .section-title {
+    max-width: 850px;
+}
+
+/* -----------------------------------------
+   CERTIFICATION GRID
+----------------------------------------- */
 
 .certifications-grid {
     display: grid;
@@ -3510,67 +3558,226 @@ h1 span {
     border-left: 1px solid var(--line);
 }
 
-.certification-card {
-    min-height: 240px;
+/* -----------------------------------------
+   CERTIFICATION CARD
+----------------------------------------- */
 
-    padding: 28px;
+.certification-card {
+    position: relative;
+
+    min-height: 280px;
+
+    padding: 32px;
+
+    background:
+        rgba(255,255,255,.012);
 
     border-right: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
 
+    display: flex;
+    flex-direction: column;
+
     transition:
-        background var(--transition);
+        background var(--transition),
+        transform var(--transition);
 }
 
 .certification-card:hover {
-    background: rgba(255,255,255,.025);
+    background:
+        rgba(255,255,255,.035);
+
+    transform:
+        translateY(-3px);
 }
 
-.certification-top {
+/* -----------------------------------------
+   CERTIFICATION PROVIDER
+----------------------------------------- */
+
+.certification-provider {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-}
-
-.certification-mark {
-    width: 28px;
-    height: 28px;
-
-    display: grid;
-    place-items: center;
-
-    border: 1px solid rgba(91,130,255,.35);
+    gap: 10px;
 
     color: var(--blue);
 
-    font-size: 12px;
+    font-family: var(--font-mono);
+
+    font-size: 10px;
+    font-weight: 400;
+
+    letter-spacing: .1em;
+    line-height: 1.4;
+
+    text-transform: uppercase;
 }
 
+.certification-provider::before {
+    content: "";
+
+    width: 18px;
+    height: 1px;
+
+    background: var(--blue);
+
+    flex-shrink: 0;
+}
+
+/* -----------------------------------------
+   CERTIFICATION TITLE
+----------------------------------------- */
+
+.certification-card h3 {
+    max-width: 390px;
+
+    margin: auto 0 14px;
+
+    color: var(--white);
+
+    font-size: 21px;
+    font-weight: 500;
+
+    line-height: 1.2;
+    letter-spacing: -.04em;
+}
+
+/* -----------------------------------------
+   CERTIFICATION DATE
+----------------------------------------- */
+
 .certification-date {
-    color: #777771;
+    display: block;
+
+    color: #777;
+
+    font-family: var(--font-mono);
+
+    font-size: 10px;
+
+    line-height: 1.5;
+
+    letter-spacing: .06em;
+
+    text-transform: uppercase;
+}
+
+/* -----------------------------------------
+   CERTIFICATION LINK
+----------------------------------------- */
+
+.certification-card a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    align-self: flex-start;
+
+    margin-top: 22px;
+
+    color: #b7b7b2;
+
+    font-family: var(--font-mono);
+
+    font-size: 10px;
+
+    letter-spacing: .05em;
+    text-transform: uppercase;
+
+    transition:
+        color var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+.certification-card a::after {
+    content: "↗";
+
+    font-size: 12px;
+
+    transition:
+        transform var(--transition-fast);
+}
+
+.certification-card a:hover {
+    color: var(--blue);
+
+    transform:
+        translateX(3px);
+}
+
+.certification-card a:hover::after {
+    transform:
+        translate(2px, -2px);
+}
+
+/* -----------------------------------------
+   CERTIFICATION INDEX
+----------------------------------------- */
+
+.certification-card::after {
+    content: "";
+
+    position: absolute;
+
+    right: 25px;
+    top: 30px;
+
+    color: rgba(255,255,255,.08);
 
     font-family: var(--font-mono);
     font-size: 9px;
 }
 
-.certification-card h3 {
-    margin: 45px 0 12px;
+/* -----------------------------------------
+   TABLET
+----------------------------------------- */
 
-    color: white;
+@media (max-width: 1000px) {
 
-    font-size: 19px;
+    .certifications-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
 
-    line-height: 1.25;
+    .certification-card {
+        min-height: 260px;
+    }
 
-    letter-spacing: -.035em;
 }
 
-.certification-card p {
-    color: #777771;
+/* -----------------------------------------
+   MOBILE
+----------------------------------------- */
 
-    font-size: 12px;
+@media (max-width: 760px) {
+
+    .certifications {
+        padding: 90px 0;
+    }
+
+    .certifications .section-header {
+        margin-bottom: 45px;
+    }
+
+    .certifications-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .certification-card {
+        min-height: 235px;
+
+        padding: 27px 24px;
+    }
+
+    .certification-card h3 {
+        font-size: 20px;
+    }
+
+    .certification-card a {
+        margin-top: 18px;
+    }
+
 }
-
 
 /* =========================================================
    17. EDUCATION
