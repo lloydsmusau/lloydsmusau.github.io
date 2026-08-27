@@ -3234,13 +3234,61 @@ h1 span {
 }
 
 
-/* =========================================================
-   15. SKILLS
-   ========================================================= */
+/* =========================================
+   SKILLS
+   Technical capabilities / capability index
+========================================= */
 
 .skills {
-    background: var(--black-soft);
+    position: relative;
+    overflow: hidden;
+    background: var(--black);
 }
+
+/* Subtle vertical technical grid */
+.skills::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    pointer-events: none;
+
+    background-image:
+        linear-gradient(
+            to right,
+            rgba(255,255,255,.035) 1px,
+            transparent 1px
+        );
+
+    background-size: 25% 100%;
+
+    opacity: .45;
+}
+
+.skills .container {
+    position: relative;
+    z-index: 1;
+}
+
+/* -----------------------------------------
+   SKILLS HEADER
+----------------------------------------- */
+
+.skills .section-header {
+    margin-bottom: 65px;
+}
+
+.skills .section-label {
+    color: #777;
+}
+
+.skills .section-title {
+    max-width: 900px;
+}
+
+/* -----------------------------------------
+   SKILLS GRID
+----------------------------------------- */
 
 .skills-grid {
     display: grid;
@@ -3251,50 +3299,196 @@ h1 span {
     gap: 1px;
 
     background: var(--line);
+
+    border-top: 1px solid var(--line);
+    border-left: 1px solid var(--line);
 }
 
-.skills-group {
-    padding: 40px;
+/* -----------------------------------------
+   SKILL CATEGORY
+----------------------------------------- */
+
+.skill-category {
+    position: relative;
+
+    min-height: 245px;
+
+    padding: 38px 40px;
 
     background: var(--black);
+
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+
+    transition:
+        background var(--transition),
+        transform var(--transition);
 }
 
-.skills-group h3 {
-    margin-bottom: 24px;
+.skill-category:hover {
+    background: #111111;
+}
+
+/* -----------------------------------------
+   CATEGORY HEADING
+----------------------------------------- */
+
+.skill-category h3 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin: 0 0 28px;
 
     color: var(--blue);
 
     font-family: var(--font-mono);
     font-size: 10px;
+    font-weight: 400;
 
     letter-spacing: .12em;
+    line-height: 1.4;
+
     text-transform: uppercase;
 }
 
-.skills-list {
+.skill-category h3::before {
+    content: "";
+
+    width: 20px;
+    height: 1px;
+
+    background: var(--blue);
+}
+
+/* -----------------------------------------
+   SKILL LIST
+----------------------------------------- */
+
+.skill-list {
     display: flex;
+
     flex-wrap: wrap;
 
     gap: 8px;
 }
 
-.skill-item {
-    padding: 8px 11px;
+/* -----------------------------------------
+   INDIVIDUAL SKILL
+----------------------------------------- */
 
-    border: 1px solid var(--line);
+.skill-list span {
+    display: inline-flex;
+    align-items: center;
 
-    color: #b3b3ae;
+    min-height: 34px;
 
-    font-size: 11px;
+    padding: 7px 12px;
+
+    border: 1px solid rgba(255,255,255,.11);
+
+    background:
+        rgba(255,255,255,.018);
+
+    color: #b9b9b4;
+
+    font-family: var(--font-body);
+    font-size: 12px;
+
+    line-height: 1.3;
 
     transition:
-        border-color var(--transition),
-        color var(--transition);
+        color var(--transition-fast),
+        border-color var(--transition-fast),
+        background var(--transition-fast),
+        transform var(--transition-fast);
 }
 
-.skill-item:hover {
-    border-color: rgba(91,130,255,.4);
-    color: white;
+.skill-list span:hover {
+    color: #ffffff;
+
+    border-color:
+        rgba(79,124,255,.55);
+
+    background:
+        rgba(79,124,255,.07);
+
+    transform:
+        translateY(-2px);
+}
+
+/* -----------------------------------------
+   SKILL CATEGORY NUMBER
+----------------------------------------- */
+
+.skill-category::after {
+    content: "";
+
+    position: absolute;
+
+    right: 25px;
+    bottom: 20px;
+
+    color: rgba(255,255,255,.07);
+
+    font-family: var(--font-mono);
+    font-size: 9px;
+
+    letter-spacing: .1em;
+}
+
+/* -----------------------------------------
+   SKILLS MOBILE
+----------------------------------------- */
+
+@media (max-width: 1000px) {
+
+    .skills-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .skill-category {
+        min-height: 220px;
+    }
+
+}
+
+@media (max-width: 760px) {
+
+    .skills {
+        padding: 90px 0;
+    }
+
+    .skills .section-header {
+        margin-bottom: 45px;
+    }
+
+    .skills-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .skill-category {
+        min-height: auto;
+
+        padding: 30px 25px;
+    }
+
+    .skill-category h3 {
+        margin-bottom: 22px;
+    }
+
+    .skill-list {
+        gap: 7px;
+    }
+
+    .skill-list span {
+        min-height: 32px;
+
+        padding: 6px 10px;
+
+        font-size: 11px;
+    }
+
 }
 
 
