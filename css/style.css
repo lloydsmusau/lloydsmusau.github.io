@@ -2895,106 +2895,342 @@ h1 span {
 }
 
 
-/* =========================================================
-   14. BOOKING
-   ========================================================= */
+/* =========================================
+   BOOKING
+   Premium consultation / scheduling section
+========================================= */
 
 .booking {
+    position: relative;
+    overflow: hidden;
     background: #ededeb;
-    color: #111;
+    color: #080808;
 }
+
+/* Subtle technical grid */
+.booking::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+
+    background-image:
+        linear-gradient(
+            to right,
+            rgba(0, 0, 0, .045) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, .045) 1px,
+            transparent 1px
+        );
+
+    background-size: 80px 80px;
+
+    opacity: .35;
+}
+
+.booking .container {
+    position: relative;
+    z-index: 1;
+}
+
+/* -----------------------------------------
+   BOOKING HEADER
+----------------------------------------- */
 
 .booking-header {
     max-width: 950px;
-
-    margin-bottom: 60px;
+    margin-bottom: 70px;
 }
 
 .booking-header > div {
     display: flex;
     align-items: center;
     gap: 14px;
-
     margin-bottom: 28px;
 }
 
-.booking-header h2 {
-    margin-bottom: 22px;
-
-    color: #111;
-
-    font-size:
-        clamp(48px, 6vw, 82px);
-
-    line-height: .95;
-
-    letter-spacing: -.065em;
+.booking-header .section-label {
+    color: #666;
 }
 
-.booking-header h2 span {
-    color: #888883;
+.booking-header h2 {
+    max-width: 850px;
+    margin: 0 0 24px;
+    color: #080808;
 }
 
 .booking-header p {
-    color: #686863;
-
-    font-size: 15px;
+    max-width: 650px;
+    margin: 0;
+    color: #62625d;
+    font-size: 17px;
+    line-height: 1.7;
 }
 
+/* -----------------------------------------
+   BOOKING INDICATOR
+----------------------------------------- */
+
+.booking-header > div::before {
+    content: "";
+    width: 28px;
+    height: 1px;
+    background: var(--blue);
+}
+
+/* -----------------------------------------
+   CALENDAR AREA
+----------------------------------------- */
+
 .calendar-wrapper {
-    min-height: 500px;
+    position: relative;
+
+    min-height: 560px;
+
+    background: #ffffff;
+
+    border: 1px solid rgba(0, 0, 0, .12);
 
     overflow: hidden;
 
-    background: white;
-
-    border: 1px solid #d8d8d3;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, .06);
 }
 
+/*
+   When the real booking/calendar embed is inserted,
+   it will occupy the same visual container.
+*/
+
+.calendar-wrapper iframe {
+    display: block;
+    width: 100%;
+    min-height: 560px;
+    border: 0;
+}
+
+/* -----------------------------------------
+   CALENDAR PLACEHOLDER
+----------------------------------------- */
+
 .calendar-placeholder {
-    min-height: 500px;
+    min-height: 560px;
 
     display: flex;
     flex-direction: column;
-
     align-items: center;
     justify-content: center;
 
-    text-align: center;
+    padding: 60px 30px;
 
-    padding: 40px;
+    text-align: center;
 }
 
+/* -----------------------------------------
+   CALENDAR ICON
+----------------------------------------- */
+
 .calendar-icon {
-    width: 64px;
-    height: 64px;
+    position: relative;
+
+    width: 72px;
+    height: 72px;
 
     display: grid;
     place-items: center;
 
-    margin-bottom: 24px;
+    margin-bottom: 28px;
 
-    border: 1px solid #ccc;
-
+    border: 1px solid rgba(0, 0, 0, .18);
     border-radius: 50%;
 
-    font-size: 25px;
+    color: #080808;
+    font-family: var(--font-mono);
+    font-size: 22px;
+
+    background: #f8f8f6;
 }
 
+.calendar-icon::after {
+    content: "";
+    position: absolute;
+
+    inset: 7px;
+
+    border: 1px solid rgba(0, 0, 0, .08);
+    border-radius: 50%;
+}
+
+/* -----------------------------------------
+   CALENDAR TEXT
+----------------------------------------- */
+
 .calendar-placeholder h3 {
-    margin-bottom: 8px;
+    margin: 0 0 12px;
 
-    color: #111;
+    color: #080808;
 
-    font-size: 26px;
+    font-size: clamp(27px, 3vw, 38px);
+    font-weight: 500;
 
-    letter-spacing: -.04em;
+    line-height: 1.05;
+    letter-spacing: -.05em;
 }
 
 .calendar-placeholder p {
-    margin-bottom: 24px;
+    max-width: 450px;
+
+    margin: 0 0 30px;
 
     color: #777;
+
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+/* -----------------------------------------
+   BOOKING CTA
+----------------------------------------- */
+
+.calendar-placeholder .btn,
+.booking .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+
+    padding: 13px 20px;
+
+    background: #080808;
+    color: #ffffff;
+
+    border: 1px solid #080808;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    letter-spacing: .01em;
+
+    transition:
+        transform var(--transition),
+        background var(--transition),
+        color var(--transition),
+        border-color var(--transition);
+}
+
+.calendar-placeholder .btn:hover,
+.booking .btn:hover {
+    transform: translateY(-3px);
+
+    background: var(--blue);
+    border-color: var(--blue);
+}
+
+/* -----------------------------------------
+   BOOKING META
+----------------------------------------- */
+
+.booking-meta {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    margin-top: 1px;
+
+    border-top: 1px solid rgba(0, 0, 0, .12);
+    border-left: 1px solid rgba(0, 0, 0, .12);
+}
+
+.booking-meta-item {
+    padding: 24px 25px;
+
+    border-right: 1px solid rgba(0, 0, 0, .12);
+    border-bottom: 1px solid rgba(0, 0, 0, .12);
+}
+
+.booking-meta-item span {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #888;
+
+    font-family: var(--font-mono);
+    font-size: 9px;
+
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.booking-meta-item strong {
+    color: #222;
+
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* -----------------------------------------
+   BOOKING MOBILE
+----------------------------------------- */
+
+@media (max-width: 760px) {
+
+    .booking {
+        padding: 85px 0;
+    }
+
+    .booking-header {
+        margin-bottom: 45px;
+    }
+
+    .booking-header > div {
+        margin-bottom: 22px;
+    }
+
+    .booking-header p {
+        font-size: 15px;
+    }
+
+    .calendar-wrapper {
+        min-height: 500px;
+    }
+
+    .calendar-wrapper iframe {
+        min-height: 500px;
+    }
+
+    .calendar-placeholder {
+        min-height: 500px;
+        padding: 45px 22px;
+    }
+
+    .calendar-icon {
+        width: 62px;
+        height: 62px;
+        margin-bottom: 22px;
+        font-size: 19px;
+    }
+
+    .calendar-placeholder h3 {
+        font-size: 28px;
+    }
+
+    .calendar-placeholder p {
+        font-size: 14px;
+        margin-bottom: 25px;
+    }
+
+    .booking-meta {
+        grid-template-columns: 1fr;
+    }
+
+    .booking-meta-item {
+        padding: 20px;
+    }
+
 }
 
 
