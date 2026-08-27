@@ -1462,24 +1462,20 @@ h2 span {
 ========================================= */
 
 .experience-list {
-
     border-top:
         1px solid
         var(--line-light);
-
 }
 
-
 .experience-item {
-
     display:
         grid;
 
     grid-template-columns:
-        180px 1fr 180px;
+        80px minmax(0, 1fr);
 
     gap:
-        40px;
+        35px;
 
     padding:
         42px 0;
@@ -1489,36 +1485,64 @@ h2 span {
         var(--line-light);
 
     transition:
-        padding var(--transition);
-
+        padding var(--transition),
+        background var(--transition);
 }
-
 
 .experience-item:hover {
-
     padding-left:
         10px;
-
 }
 
-
-.experience-date {
+.experience-index {
+    color:
+        #777;
 
     font-family:
         "DM Mono",
         monospace;
 
-    color:
-        #888;
-
     font-size:
         11px;
 
+    padding-top:
+        5px;
 }
 
+.experience-main {
+    min-width:
+        0;
+}
+
+.experience-header {
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        flex-start;
+
+    gap:
+        30px;
+}
+
+.experience-main h3 {
+    font-size:
+        27px;
+
+    line-height:
+        1.15;
+
+    letter-spacing:
+        -.045em;
+
+    margin-bottom:
+        12px;
+}
 
 .experience-company {
-
     display:
         block;
 
@@ -1535,50 +1559,118 @@ h2 span {
     text-transform:
         uppercase;
 
+    letter-spacing:
+        .08em;
+
     margin-bottom:
         10px;
-
 }
 
-
-.experience-main h3 {
-
-    font-size:
-        27px;
-
-    letter-spacing:
-        -.045em;
-
-    margin-bottom:
-        12px;
-
-}
-
-
-.experience-main p {
-
-    max-width:
-        700px;
+.experience-date {
+    flex-shrink:
+        0;
 
     color:
-        #686863;
+        #888;
+
+    font-family:
+        "DM Mono",
+        monospace;
 
     font-size:
-        14px;
+        11px;
 
-}
-
-
-.experience-location {
+    line-height:
+        1.5;
 
     text-align:
         right;
 
+    white-space:
+        nowrap;
+}
+
+.experience-location {
     color:
-        #8a8a84;
+        #777;
+
+    font-family:
+        "DM Mono",
+        monospace;
 
     font-size:
-        12px;
+        10px;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        .08em;
+
+    margin-top:
+        8px;
+}
+
+.experience-description {
+    max-width:
+        760px;
+
+    color:
+        #666;
+
+    font-size:
+        15px;
+
+    line-height:
+        1.75;
+
+    margin-top:
+        18px;
+}
+
+
+/* =========================================
+   EXPERIENCE — MOBILE
+========================================= */
+
+@media (max-width: 768px) {
+
+    .experience-item {
+        grid-template-columns:
+            1fr;
+
+        gap:
+            12px;
+
+        padding:
+            35px 0;
+    }
+
+    .experience-index {
+        padding-top:
+            0;
+    }
+
+    .experience-header {
+        flex-direction:
+            column;
+
+        gap:
+            8px;
+    }
+
+    .experience-date {
+        text-align:
+            left;
+
+        white-space:
+            normal;
+    }
+
+    .experience-main h3 {
+        font-size:
+            23px;
+    }
 
 }
 
