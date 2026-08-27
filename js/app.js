@@ -166,17 +166,22 @@ function applySettings(settings) {
 
     const visibilityMap = {
 
-        show_experience: "experience",
+    show_experience:
+        "experience",
 
-        show_projects: "projects",
+    show_projects:
+        "projects",
 
-        show_certifications: "certifications",
+    show_certifications:
+        "certifications",
 
-        show_skills: "skills",
+    show_skills:
+        "skills",
 
-        show_education: "education"
+    show_education:
+        "education"
 
-    };
+};
 
     Object.entries(visibilityMap).forEach(
         ([setting, sectionId]) => {
