@@ -1289,19 +1289,76 @@ h1 span {
 }
 
 
-/* =========================================================
-   10. ABOUT
-   ========================================================= */
+/* =========================================
+   ABOUT — EDITORIAL POSITIONING
+========================================= */
 
 .about {
-    background: var(--light);
-    color: var(--light-text);
+    position: relative;
+    background: var(--white);
+    color: #0a0a0a;
+    overflow: hidden;
 }
 
-.about .section-number,
-.about .section-label {
-    color: #6b6b65;
+/* subtle vertical editorial grid */
+.about::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    pointer-events: none;
+
+    background-image:
+        linear-gradient(
+            to right,
+            transparent 0,
+            transparent calc(25% - 1px),
+            rgba(0,0,0,.055) 25%,
+            transparent calc(25% + 1px),
+
+            transparent calc(50% - 1px),
+            rgba(0,0,0,.055) 50%,
+            transparent calc(50% + 1px),
+
+            transparent calc(75% - 1px),
+            rgba(0,0,0,.055) 75%,
+            transparent calc(75% + 1px)
+        );
+
+    opacity: .7;
 }
+
+.about .container {
+    position: relative;
+    z-index: 1;
+}
+
+/* -----------------------------------------
+   SECTION HEADER
+----------------------------------------- */
+
+.about .section-header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+
+    padding-bottom: 20px;
+    margin-bottom: 85px;
+
+    border-bottom: 1px solid rgba(0,0,0,.12);
+}
+
+.about .section-number {
+    color: var(--blue);
+}
+
+.about .section-label {
+    color: #666;
+}
+
+/* -----------------------------------------
+   MAIN GRID
+----------------------------------------- */
 
 .about-grid {
     display: grid;
@@ -1310,7 +1367,17 @@ h1 span {
         minmax(0, .95fr)
         minmax(0, 1.05fr);
 
-    gap: 110px;
+    gap: clamp(60px, 9vw, 150px);
+
+    align-items: start;
+}
+
+/* -----------------------------------------
+   HEADLINE
+----------------------------------------- */
+
+.about-heading {
+    position: relative;
 }
 
 .about-heading h2 {
@@ -1318,196 +1385,537 @@ h1 span {
 
     margin: 0;
 
-    color: #111;
+    color: #090909;
 
     font-size:
-        clamp(48px, 6vw, 82px);
+        clamp(
+            52px,
+            6.5vw,
+            100px
+        );
 
-    line-height: .94;
+    font-weight: 500;
 
-    letter-spacing: -.065em;
+    line-height: .91;
+
+    letter-spacing: -.07em;
 }
 
 .about-heading h2 span {
     display: block;
-
-    color: #888883;
+    color: #777;
 }
+
+/* -----------------------------------------
+   CONTENT
+----------------------------------------- */
 
 .about-content {
-    max-width: 650px;
+    max-width: 610px;
+
+    padding-top: 8px;
 }
 
-.large-text {
-    margin-bottom: 28px;
+.about-content .large-text {
+    margin: 0 0 32px;
 
-    color: #171717;
+    color: #151515;
 
     font-size:
-        clamp(21px, 2vw, 27px);
+        clamp(
+            21px,
+            2vw,
+            29px
+        );
 
-    line-height: 1.45;
+    font-weight: 400;
 
-    letter-spacing: -.025em;
+    line-height: 1.42;
+
+    letter-spacing: -.035em;
 }
 
 .about-content p:not(.large-text) {
-    margin-bottom: 32px;
+    max-width: 530px;
 
-    color: #666660;
+    margin: 0 0 42px;
+
+    color: #666;
 
     font-size: 15px;
+
     line-height: 1.8;
 }
 
+/* -----------------------------------------
+   LINK
+----------------------------------------- */
+
 .about .text-link {
-    color: #111;
+    position: relative;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding-bottom: 7px;
+
+    color: #0a0a0a;
+
+    font-family: var(--font-mono);
+
+    font-size: 11px;
+
+    letter-spacing: .05em;
+
+    text-transform: uppercase;
+}
+
+.about .text-link::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    height: 1px;
+
+    background: #111;
+
+    transform:
+        scaleX(.35);
+
+    transform-origin: left;
+
+    transition:
+        transform var(--transition);
+}
+
+.about .text-link:hover::after {
+    transform:
+        scaleX(1);
+}
+
+.about .text-link span {
+    transition:
+        transform var(--transition);
+}
+
+.about .text-link:hover span {
+    transform:
+        translateX(5px);
+}
+
+/* -----------------------------------------
+   MOBILE
+----------------------------------------- */
+
+@media (max-width: 760px) {
+
+    .about {
+        padding:
+            85px 0;
+    }
+
+    .about::before {
+        background-image:
+            linear-gradient(
+                to right,
+                transparent 0,
+                transparent calc(50% - 1px),
+                rgba(0,0,0,.045) 50%,
+                transparent calc(50% + 1px)
+            );
+    }
+
+    .about .section-header {
+        margin-bottom: 55px;
+        padding-bottom: 16px;
+    }
+
+    .about-grid {
+        grid-template-columns: 1fr;
+        gap: 50px;
+    }
+
+    .about-heading h2 {
+        font-size:
+            clamp(
+                48px,
+                14vw,
+                72px
+            );
+
+        line-height: .92;
+    }
+
+    .about-content {
+        padding-top: 0;
+    }
+
+    .about-content .large-text {
+        font-size: 20px;
+        line-height: 1.5;
+    }
+
+    .about-content p:not(.large-text) {
+        font-size: 14px;
+        line-height: 1.75;
+    }
+
 }
 
 
-/* =========================================================
-   11. EXPERTISE
-   ========================================================= */
+/* =========================================
+   EXPERTISE — CAPABILITY INDEX
+========================================= */
 
 .expertise {
-    background: var(--black-soft);
+    position: relative;
+
+    background:
+        var(--black-soft);
+
+    overflow: hidden;
 }
 
-.expertise-intro {
+/* -----------------------------------------
+   BACKGROUND GRID
+----------------------------------------- */
+
+.expertise::before {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    pointer-events: none;
+
+    background-image:
+        linear-gradient(
+            to right,
+            transparent 0,
+            transparent calc(25% - 1px),
+            rgba(255,255,255,.035) 25%,
+            transparent calc(25% + 1px),
+
+            transparent calc(50% - 1px),
+            rgba(255,255,255,.035) 50%,
+            transparent calc(50% + 1px),
+
+            transparent calc(75% - 1px),
+            rgba(255,255,255,.035) 75%,
+            transparent calc(75% + 1px)
+        );
+
+    opacity: .65;
+}
+
+.expertise .container {
+    position: relative;
+    z-index: 1;
+}
+
+/* -----------------------------------------
+   HEADER
+----------------------------------------- */
+
+.expertise .section-header {
     display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
 
-    gap: 40px;
+    padding-bottom: 20px;
+    margin-bottom: 75px;
 
-    margin-bottom: 60px;
+    border-bottom:
+        1px solid
+        var(--line-light);
+}
+
+.expertise .section-label {
+    color: #777;
+}
+
+/* -----------------------------------------
+   INTRO
+----------------------------------------- */
+
+.expertise-intro {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        280px;
+
+    gap: 60px;
+
+    align-items: end;
+
+    margin-bottom: 80px;
 }
 
 .expertise-intro h2 {
-    max-width: 800px;
+    max-width: 850px;
 
     margin: 0;
 
-    color: white;
+    color: var(--white);
 
     font-size:
-        clamp(44px, 5.5vw, 78px);
+        clamp(
+            48px,
+            6vw,
+            90px
+        );
 
-    line-height: .95;
+    font-weight: 500;
 
-    letter-spacing: -.065em;
+    line-height: .92;
+
+    letter-spacing: -.07em;
 }
 
 .expertise-intro h2 span {
-    display: block;
-
-    color: #666662;
+    color: #666;
 }
 
 .expertise-intro p {
-    max-width: 280px;
+    max-width: 240px;
 
     margin: 0;
 
-    color: #777772;
+    color: #777;
 
-    font-size: 13px;
+    font-family: var(--font-mono);
+
+    font-size: 11px;
+
+    line-height: 1.7;
+
+    letter-spacing: .04em;
 }
 
-
-/* Dynamically generated cards */
+/* -----------------------------------------
+   CAPABILITY GRID
+----------------------------------------- */
 
 .expertise-grid {
     display: grid;
 
     grid-template-columns:
-        repeat(3, minmax(0, 1fr));
+        repeat(3, 1fr);
 
-    border-top: 1px solid var(--line);
-    border-left: 1px solid var(--line);
+    border-top:
+        1px solid
+        var(--line-light);
+
+    border-left:
+        1px solid
+        var(--line-light);
 }
+
+/* -----------------------------------------
+   CARD
+----------------------------------------- */
 
 .expertise-card {
     position: relative;
 
-    min-height: 280px;
+    min-height: 310px;
 
-    padding: 30px;
+    padding:
+        32px;
 
-    border-right: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
+    border-right:
+        1px solid
+        var(--line-light);
 
-    overflow: hidden;
+    border-bottom:
+        1px solid
+        var(--line-light);
+
+    background:
+        rgba(255,255,255,.008);
 
     transition:
         background var(--transition),
         transform var(--transition);
 }
 
+.expertise-card:hover {
+    background:
+        rgba(255,255,255,.035);
+
+    transform:
+        translateY(-3px);
+}
+
+/* -----------------------------------------
+   NUMBER
+----------------------------------------- */
+
+.expertise-card-number {
+    display: block;
+
+    margin-bottom: 100px;
+
+    color: var(--blue);
+
+    font-family: var(--font-mono);
+
+    font-size: 10px;
+
+    letter-spacing: .08em;
+}
+
+/* -----------------------------------------
+   TITLE
+----------------------------------------- */
+
+.expertise-card h3 {
+    margin: 0 0 14px;
+
+    color: var(--white);
+
+    font-size:
+        clamp(
+            22px,
+            2vw,
+            29px
+        );
+
+    font-weight: 500;
+
+    line-height: 1.05;
+
+    letter-spacing: -.045em;
+}
+
+/* -----------------------------------------
+   DESCRIPTION
+----------------------------------------- */
+
+.expertise-card p {
+    max-width: 390px;
+
+    margin: 0;
+
+    color: #777;
+
+    font-size: 13px;
+
+    line-height: 1.7;
+}
+
+/* -----------------------------------------
+   ACCENT LINE
+----------------------------------------- */
+
 .expertise-card::after {
     content: "";
 
     position: absolute;
 
-    right: -50px;
-    bottom: -50px;
+    left: 32px;
+    bottom: 0;
 
-    width: 130px;
-    height: 130px;
+    width: 0;
+    height: 1px;
 
-    border: 1px solid rgba(91,130,255,.15);
+    background: var(--blue);
 
-    transform: rotate(45deg);
-
-    transition: transform var(--transition);
-}
-
-.expertise-card:hover {
-    background: rgba(255,255,255,.025);
+    transition:
+        width var(--transition);
 }
 
 .expertise-card:hover::after {
-    transform: rotate(45deg) scale(1.15);
+    width: 55px;
 }
 
-.card-number {
-    display: block;
+/* -----------------------------------------
+   TABLET
+----------------------------------------- */
 
-    margin-bottom: 70px;
+@media (max-width: 1000px) {
 
-    color: var(--blue);
+    .expertise-intro {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
 
-    font-family: var(--font-mono);
-    font-size: 10px;
+    .expertise-intro p {
+        max-width: 420px;
+    }
+
+    .expertise-grid {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
 }
 
-.expertise-card h3 {
-    margin-bottom: 18px;
+/* -----------------------------------------
+   MOBILE
+----------------------------------------- */
 
-    color: white;
+@media (max-width: 760px) {
 
-    font-size: 22px;
+    .expertise {
+        padding:
+            90px 0;
+    }
 
-    letter-spacing: -.035em;
+    .expertise .section-header {
+        margin-bottom: 55px;
+    }
+
+    .expertise-intro {
+        gap: 22px;
+
+        margin-bottom: 55px;
+    }
+
+    .expertise-intro h2 {
+        font-size:
+            clamp(
+                45px,
+                13vw,
+                68px
+            );
+    }
+
+    .expertise-intro p {
+        font-size: 10px;
+    }
+
+    .expertise-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .expertise-card {
+        min-height: 245px;
+
+        padding: 27px;
+    }
+
+    .expertise-card-number {
+        margin-bottom: 65px;
+    }
+
+    .expertise-card h3 {
+        font-size: 24px;
+    }
+
+    .expertise-card::after {
+        left: 27px;
+    }
+
 }
-
-.expertise-skills {
-    display: flex;
-    flex-wrap: wrap;
-
-    gap: 7px;
-}
-
-.expertise-skills span {
-    padding: 6px 9px;
-
-    border: 1px solid var(--line);
-
-    color: #898984;
-
-    font-size: 10px;
-}
-
 
 /* =========================================================
    12. EXPERIENCE
